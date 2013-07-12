@@ -1,4 +1,8 @@
 #!/bin/ksh
+##
+## WARNING:
+##	Cannot migrate $START_HOOK in fml cf
+##
 
 set -u
 umask 0027
@@ -60,6 +64,7 @@ for ml_name in *; do
   mm_postid=$(cat "$ml_name/seq" 2>/dev/null) && let mm_postid++
   mm_mbox="$mm_archive_dir/private/$ml_name_lower.mbox/$ml_name_lower.mbox"
   mm_admin_pass=$(printf '%04x%04x%04x%04x' $RANDOM $RANDOM $RANDOM $RANDOM)
+  mm_reply_goes_to_list=1 ## "Reply-To: This list" by default
 
   if [[ ${fml_cf[AUTO_REGISTRATION_TYPE]} != 'confirmation' ]]; then
     perr "$ml_name: AUTO_REGISTRATION_TYPE='${fml_cf[AUTO_REGISTRATION_TYPE]}' not supported"
@@ -158,6 +163,7 @@ for ml_name in *; do
     ## FIXME
     echo "m.subscribe_policy = 3"
     echo "m.generic_nonmember_action = $mm_generic_nonmember_action"
+    echo "m.reply_goes_to_list = $mm_reply_goes_to_list"
     echo "m.archive_volume_frequency = $mm_archive_volume_frequency"
     ## FIXME
     #${fml_cf[REJECT_ADDR]}
@@ -183,15 +189,12 @@ for ml_name in *; do
   |run withlist --quiet --lock "$ml_name_lower" \
     || exit 1
 
-  # FIXME
-  #${fml_cf[REPLY-TO]}
-
+  ## FIXME: Migrate header filter
   header_filter=$(
     sed -n 's/^ *&*DEFINE_FIELD_PAT_TO_REJECT(.\(.*\)., *.\(.*\).);/\1:.*\2/p' \
       "$fml_cf_file" \
       ;
   )
-  ## FIXME: Migrate header filter
 
   ## FIXME: Compare actives and members
   sed -n '/^[^#]/p;s/^# //p' "$ml_name/actives" \
@@ -204,7 +207,7 @@ for ml_name in *; do
 
   ## FIXME: Disable delivery
   #sed -n 's/^# //p' "$ml_name/actives" \
-  #|FIXME
+  #|...
 
   if ls "$ml_name/spool" 2>/dev/null |grep '^[1-9][0-9]*$' >/dev/null; then
     (cd "$ml_name/spool" && packmbox.pl) >"$mm_mbox.fml" \
