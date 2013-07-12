@@ -181,7 +181,7 @@ for ml_name in *; do
   } \
   |tee /dev/stderr \
   |run withlist --quiet --lock "$ml_name_lower" \
-  ;
+    || exit 1
 
   # FIXME
   #${fml_cf[REPLY-TO]}
