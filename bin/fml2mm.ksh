@@ -19,14 +19,13 @@ mm_archive_dir="/opt/osstech/var/lib/mailman/archives"
 export PATH="$mm_sbin_dir:$(cd "${0%/*}" && pwd):$PATH" || exit 1
 unset PYTHONPATH
 
-if [[ $# -ne 3 ]]; then
-  echo "Usage: $0 FML_DIR URL_HOST ADMIN_DEFAULT"
+if [[ $# -ne 2 ]]; then
+  echo "Usage: $0 FML_DIR URL_HOST"
   exit 1
 fi
 
 fml_dir="$1"; shift
 mm_url_host="$1"; shift
-mm_admin_default="$1"; shift
 
 typeset -l ml_name_lower
 
@@ -45,10 +44,6 @@ for ml_name in *; do
     continue
   fi
 
-  mm_postid=$(cat "$ml_name/seq" 2>/dev/null) && let mm_postid++
-  mm_mbox="$mm_archive_dir/private/$ml_name_lower.mbox/$ml_name_lower.mbox"
-  mm_admin_pass=$(printf '%04x%04x%04x%04x' $RANDOM $RANDOM $RANDOM $RANDOM)
-
   unset fml_cf
   typeset -A fml_cf
   typeset -u cf_name
@@ -60,6 +55,11 @@ for ml_name in *; do
     fml_cf[$cf_name]="${cf_value/\$DOMAINNAME/${fml_cf[DOMAINNAME]-}}"
     #echo "fml_cf[$cf_name]='${fml_cf[$cf_name]}'"
   done
+
+  mm_admin="fml@${fml_cf[DOMAINNAME]}"
+  mm_postid=$(cat "$ml_name/seq" 2>/dev/null) && let mm_postid++
+  mm_mbox="$mm_archive_dir/private/$ml_name_lower.mbox/$ml_name_lower.mbox"
+  mm_admin_pass=$(printf '%04x%04x%04x%04x' $RANDOM $RANDOM $RANDOM $RANDOM)
 
   if [[ ${fml_cf[AUTO_REGISTRATION_TYPE]} != 'confirmation' ]]; then
     perr "$ml_name: AUTO_REGISTRATION_TYPE='${fml_cf[AUTO_REGISTRATION_TYPE]}' not supported"
@@ -119,14 +119,6 @@ for ml_name in *; do
     ;;
   esac
 
-  grep -v '^#' "$ml_name/members-admin" 2>/dev/null \
-  |head -n 1 \
-  |read -r mm_admin \
-  ;
-  if [[ -z ${mm_admin-} ]]; then
-    mm_admin="$mm_admin_default"
-  fi
-
   run newlist \
     --quiet \
     --emailhost="${fml_cf[DOMAINNAME]}" \
@@ -146,12 +138,14 @@ for ml_name in *; do
     echo "m.subscribe_policy = 3"
     echo "m.generic_nonmember_action = $mm_generic_nonmember_action"
     echo "m.archive_volume_frequency = $mm_archive_volume_frequency"
+    ## FIXME
+    #${fml_cf[REJECT_ADDR]}
 
-    echo -n "m.owner += ["
-    grep -v '^#' "$ml_name/members-admin" 2>/dev/null \
-    |sed -n '2,$s/\(.*\)/"\1",/p'
-    ;
-    echo ']'
+    if [[ -f $ml_name/members-admin ]]; then
+      echo "m.owner += ["
+      sed -n 's/\([^#].*\)/"\1",/p' "$ml_name/members-admin"
+      echo ']'
+    fi
 
     if [[ -n $mm_postid ]]; then
       echo "m.post_id = $mm_postid"
@@ -165,7 +159,6 @@ for ml_name in *; do
 
   # FIXME
   #${fml_cf[REPLY-TO]}
-  #${fml_cf[REJECT_ADDR]}
 
   header_filter=$(
     sed -n 's/^ *&*DEFINE_FIELD_PAT_TO_REJECT(.\(.*\)., *.\(.*\).);/\1:.*\2/p' \
