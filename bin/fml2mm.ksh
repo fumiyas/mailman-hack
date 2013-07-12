@@ -93,11 +93,31 @@ for ml_name in *; do
     mm_subject_post_id_fmt="%0${fml_cf[SUBJECT_FORM_LONG_ID]}d"
   fi
   mm_subject_prefix=''
-  if [[ ${fml_cf[SUBJECT_TAG_TYPE]} ]]; then
-    mm_subject_prefix="${fml_cf[SUBJECT_TAG_TYPE]} "
-    mm_subject_prefix="${mm_subject_prefix/:/$ml_name:$mm_subject_post_id_fmt}"
-    mm_subject_prefix="${mm_subject_prefix/,/$ml_name:$mm_subject_post_id_fmt}"
-    mm_subject_prefix="${mm_subject_prefix/ID/$mm_subject_post_id_fmt}"
+  if [[ -n ${fml_cf[SUBJECT_TAG_TYPE]} ]]; then
+    case "${fml_cf[SUBJECT_TAG_TYPE]}" in
+    '( )'|'[ ]')
+      mm_subject_prefix="${fml_cf[SUBJECT_TAG_TYPE]/ /$ml_name $mm_subject_post_id_fmt}"
+      ;;
+    '(:)'|'[:]')
+      mm_subject_prefix="${fml_cf[SUBJECT_TAG_TYPE]/:/$ml_name:$mm_subject_post_id_fmt}"
+      ;;
+    '(,)'|'[,]')
+      mm_subject_prefix="${fml_cf[SUBJECT_TAG_TYPE]/,/$ml_name,$mm_subject_post_id_fmt}"
+      ;;
+    '(ID)'|'[ID]')
+      mm_subject_prefix="${fml_cf[SUBJECT_TAG_TYPE]/ID/$mm_subject_post_id_fmt}"
+      ;;
+    '()')
+      mm_subject_prefix="(${fml_cf[SUBJECT_TAG_TYPE]})"
+      ;;
+    '[]')
+      mm_subject_prefix="[${fml_cf[SUBJECT_TAG_TYPE]}]"
+      ;;
+    *)
+      perr "$ml_name: SUBJECT_TAG_TYPE='${fml_cf[PERMIT_POST_FROM]}' invalid"
+      ;;
+    esac
+    mm_subject_prefix="$mm_subject_prefix "
   fi
 
   case "${fml_cf[HTML_INDEX_UNIT]-}" in
