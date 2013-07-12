@@ -147,6 +147,11 @@ for ml_name in *; do
       sed -n 's/\([^#].*\)/"\1",/p' "$ml_name/members-admin"
       echo ']'
     fi
+    if [[ -f $ml_name/moderators ]]; then
+      echo "m.moderator += ["
+      sed -n 's/\([^#].*\)/"\1",/p' "$ml_name/moderators"
+      echo ']'
+    fi
 
     if [[ -n $mm_postid ]]; then
       echo "m.post_id = $mm_postid"
