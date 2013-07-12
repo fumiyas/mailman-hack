@@ -88,20 +88,21 @@ for ml_name in *; do
     ;;
   esac
 
-  mm_subject_post_id_f='%d'
+  mm_subject_post_id_fmt='%d'
   if [[ -n ${fml_cf[SUBJECT_FORM_LONG_ID]-} ]]; then
-    mm_subject_post_id_f="%0${fml_cf[SUBJECT_FORM_LONG_ID]}d"
+    mm_subject_post_id_fmt="%0${fml_cf[SUBJECT_FORM_LONG_ID]}d"
   fi
   mm_subject_prefix=''
   if [[ ${fml_cf[SUBJECT_TAG_TYPE]} ]]; then
     mm_subject_prefix="${fml_cf[SUBJECT_TAG_TYPE]} "
-    mm_subject_prefix="${mm_subject_prefix/:/$ml_name:$mm_subject_post_id_f}"
-    mm_subject_prefix="${mm_subject_prefix/,/$ml_name:$mm_subject_post_id_f}"
-    mm_subject_prefix="${mm_subject_prefix/ID/$mm_subject_post_id_f}"
+    mm_subject_prefix="${mm_subject_prefix/:/$ml_name:$mm_subject_post_id_fmt}"
+    mm_subject_prefix="${mm_subject_prefix/,/$ml_name:$mm_subject_post_id_fmt}"
+    mm_subject_prefix="${mm_subject_prefix/ID/$mm_subject_post_id_fmt}"
   fi
 
   case "${fml_cf[HTML_INDEX_UNIT]-}" in
   infinite)
+    ## Yearly
     mm_archive_volume_frequency=0
     ;;
   month)
@@ -114,7 +115,7 @@ for ml_name in *; do
     mm_archive_volume_frequency=4
     ;;
   *)
-    ## monthly
+    ## Monthly
     mm_archive_volume_frequency=1
     ;;
   esac
