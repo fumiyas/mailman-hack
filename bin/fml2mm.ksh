@@ -8,7 +8,7 @@ set -u
 umask 0027
 
 function perr {
-  echo "ERROR: $*"
+  echo "ERROR: $*" 1>&2
 }
 
 function run {
