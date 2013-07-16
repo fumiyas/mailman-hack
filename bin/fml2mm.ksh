@@ -16,6 +16,10 @@ function run {
   "$@"
 }
 
+tmp_dir=$(mktemp -d /tmp/${0##*/}.XXXXXX)
+trap 'rm -rf "$tmp_dir"; trap - EXIT; exit 1' HUP INT
+trap 'rm -rf "$tmp_dir"' EXIT
+
 mm_sbin_dir="/opt/osstech/sbin"
 mm_lists_dir="/opt/osstech/var/lib/mailman/lists"
 mm_archive_dir="/opt/osstech/var/lib/mailman/archives"
@@ -88,6 +92,9 @@ for ml_name in *; do
       ;;
     esac
     ;;
+  #moderator)
+  # FIXME
+  #  ;;
   *)
     perr "$ml_name: PERMIT_POST_FROM='${fml_cf[PERMIT_POST_FROM]}' not supported"
     ;;
@@ -188,6 +195,7 @@ for ml_name in *; do
   |tee /dev/stderr \
   |run withlist --quiet --lock "$ml_name_lower" \
     || exit 1
+  echo
 
   ## FIXME: Migrate header filter
   header_filter=$(
@@ -196,10 +204,35 @@ for ml_name in *; do
       ;
   )
 
-  ## FIXME: Compare actives and members
-  sed -n '/^[^#]/p;s/^# //p' "$ml_name/actives" \
-  |run add_members \
-    --regular-members-file=- \
+  ## FIXME: Migrate members file
+  touch "$tmp_dir/$ml_name.regular-members" "$tmp_dir/$ml_name.digest-members"
+  sed -n '/^[^#]/p' "$ml_name/actives" \
+  |while read -r address options; do
+    skip=
+    digest=
+    for option in $options; do
+      case "$option" in
+      s=skip|s=1)
+	skip=set
+	;;
+      m=[1-9]*)
+	digest=set
+	;;
+      esac
+    done
+    if [[ -n $skip ]]; then
+      continue
+    fi
+    if [[ -n $digest ]]; then
+      echo "$address" >>"$tmp_dir/$ml_name.digest-members"
+    else
+      echo "$address" >>"$tmp_dir/$ml_name.regular-members"
+    fi
+  done \
+
+  run add_members \
+    --regular-members-file="$tmp_dir/$ml_name.regular-members" \
+    --digest-members-file="$tmp_dir/$ml_name.digest-members" \
     --welcome-msg=n \
     --admin-notify=n \
     "$ml_name" \
