@@ -20,9 +20,9 @@ tmp_dir=$(mktemp -d /tmp/${0##*/}.XXXXXX)
 trap 'rm -rf "$tmp_dir"; trap - EXIT; exit 1' HUP INT
 trap 'rm -rf "$tmp_dir"' EXIT
 
-mm_sbin_dir="/opt/osstech/sbin"
-mm_lists_dir="/opt/osstech/var/lib/mailman/lists"
-mm_archive_dir="/opt/osstech/var/lib/mailman/archives"
+mm_sbin_dir="${MM_SBIN_DIR-/opt/osstech/sbin}"
+mm_lists_dir="${MM_LISTS_DIR-/opt/osstech/var/lib/mailman/lists}"
+mm_archive_dir="${MM_ARCHIVE_DIR-/opt/osstech/var/lib/mailman/archives}"
 
 export PATH="$mm_sbin_dir:$(cd "${0%/*}" && pwd):$PATH" || exit 1
 unset PYTHONPATH
