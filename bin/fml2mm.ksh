@@ -100,6 +100,13 @@ for ml_name in *; do
     ;;
   esac
 
+  #mm_subscribe_policy=2 ## Require approval
+  mm_subscribe_policy=3 ## Confirm and approve
+  if [[ ${fml_cf[PERMIT_COMMAND_FROM]} = 'anyone' ||
+        ${fml_cf[REJECT_COMMAND_HANDLER]} = 'auto_regist' ]]; then
+    mm_subscribe_policy=1 ## Confirm
+  fi
+
   mm_subject_post_id_fmt='%d'
   if [[ -n ${fml_cf[SUBJECT_FORM_LONG_ID]-} ]]; then
     mm_subject_post_id_fmt="%0${fml_cf[SUBJECT_FORM_LONG_ID]}d"
@@ -167,8 +174,7 @@ for ml_name in *; do
   {
     echo "m.real_name = '$ml_name'"
     echo "m.subject_prefix = '$mm_subject_prefix'"
-    ## FIXME
-    echo "m.subscribe_policy = 3"
+    echo "m.subscribe_policy = $mm_subscribe_policy"
     echo "m.generic_nonmember_action = $mm_generic_nonmember_action"
     echo "m.reply_goes_to_list = $mm_reply_goes_to_list"
     echo "m.archive_volume_frequency = $mm_archive_volume_frequency"
