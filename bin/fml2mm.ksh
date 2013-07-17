@@ -173,13 +173,12 @@ for ml_name in *; do
 
   {
     echo "m.real_name = '$ml_name'"
+    echo "m.reject_these_nonmembers = ['^(${fml_cf[REJECT_ADDR]})@']"
     echo "m.subject_prefix = '$mm_subject_prefix'"
     echo "m.subscribe_policy = $mm_subscribe_policy"
     echo "m.generic_nonmember_action = $mm_generic_nonmember_action"
     echo "m.reply_goes_to_list = $mm_reply_goes_to_list"
     echo "m.archive_volume_frequency = $mm_archive_volume_frequency"
-    ## FIXME
-    #${fml_cf[REJECT_ADDR]}
 
     if [[ -f $ml_name/members-admin ]]; then
       echo "m.owner += ["
