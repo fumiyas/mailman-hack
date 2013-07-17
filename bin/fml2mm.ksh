@@ -103,7 +103,7 @@ for ml_name in *; do
   #mm_subscribe_policy=2 ## Require approval
   mm_subscribe_policy=3 ## Confirm and approve
   if [[ ${fml_cf[PERMIT_COMMAND_FROM]} = 'anyone' ||
-        ${fml_cf[REJECT_COMMAND_HANDLER]} = 'auto_regist' ]]; then
+        ${fml_cf[REJECT_COMMAND_HANDLER]} = @(auto_subscribe|auto_regist) ]]; then
     mm_subscribe_policy=1 ## Confirm
   fi
 
