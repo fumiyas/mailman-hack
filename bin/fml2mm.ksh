@@ -7,8 +7,15 @@
 set -u
 umask 0027
 
+cmd_arg0="$0"
+
 function perr {
-  echo "ERROR: $*" 1>&2
+  echo "$cmd_arg0: ERROR: $1" 1>&2
+}
+
+function pdie {
+  perr "$1"
+  exit ${2-1}
 }
 
 function run {
@@ -16,7 +23,8 @@ function run {
   "$@"
 }
 
-tmp_dir=$(mktemp -d /tmp/${0##*/}.XXXXXX)
+tmp_dir=$(mktemp -d /tmp/${0##*/}.XXXXXXXX) \
+  || pdie "Cannot create temporary directory"
 trap 'rm -rf "$tmp_dir"; trap - EXIT; exit 1' HUP INT
 trap 'rm -rf "$tmp_dir"' EXIT
 
