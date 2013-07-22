@@ -203,6 +203,14 @@ for ml_name in *; do
       echo "m.post_id = $mm_postid"
     fi
 
+    echo "m.accept_these_nonmembers += ["
+    diff \
+      <(sed -n 's/^\([^# 	]*\).*$/\1/p;' "$ml_name/members") \
+      <(sed -n 's/^\([^# 	]*\).*$/\1/p;' "$ml_name/actives") \
+    |sed -n 's/^< \(.*\)$/"\1",/p' \
+    ;
+    echo ']'
+
     echo 'm.Save()'
   } \
   |tee /dev/stderr \
