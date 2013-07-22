@@ -225,7 +225,6 @@ for ml_name in *; do
       ;
   )
 
-  ## FIXME: Migrate members file
   touch "$tmp_dir/$ml_name.regular-members" "$tmp_dir/$ml_name.digest-members"
   sed -n '/^[^#]/p' "$ml_name/actives" \
   |while read -r address options; do
@@ -258,10 +257,6 @@ for ml_name in *; do
     --admin-notify=n \
     "$ml_name" \
     || exit 1
-
-  ## FIXME: Disable delivery
-  #sed -n 's/^# //p' "$ml_name/actives" \
-  #|...
 
   if ls "$ml_name/spool" 2>/dev/null |grep '^[1-9][0-9]*$' >/dev/null; then
     (cd "$ml_name/spool" && packmbox.pl) >"$mm_mbox.fml" \
