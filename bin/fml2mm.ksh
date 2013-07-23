@@ -9,6 +9,10 @@ umask 0027
 
 cmd_arg0="$0"
 
+function pinfo {
+  echo "INFO: $1"
+}
+
 function perr {
   echo "$cmd_arg0: ERROR: $1" 1>&2
 }
@@ -51,7 +55,7 @@ for ml_name in *; do
 
   fml_cf_file="$ml_name/cf"
   [[ -f $fml_cf_file ]] || continue
-  echo "Migrating fml $ml_name ..."
+  pinfo "Start: $ml_name"
 
   ml_name_lower="$ml_name"
   mm_ml_dir="$mm_lists_dir/$ml_name_lower"
@@ -59,6 +63,8 @@ for ml_name in *; do
     echo "Mailman $ml_name already exists"
     continue
   fi
+
+  pinfo "Reading $fml_cf_file"
 
   unset fml_cf
   typeset -A fml_cf
@@ -71,6 +77,8 @@ for ml_name in *; do
     fml_cf[$cf_name]="${cf_value/\$DOMAINNAME/${fml_cf[DOMAINNAME]-}}"
     #echo "fml_cf[$cf_name]='${fml_cf[$cf_name]}'"
   done
+
+  pinfo "Constructing Mailman configs"
 
   mm_admin="fml@${fml_cf[DOMAINNAME]}"
   mm_postid=$(cat "$ml_name/seq" 2>/dev/null) && let mm_postid++
@@ -167,6 +175,7 @@ for ml_name in *; do
     ;;
   esac
 
+  pinfo "Creating new list in Mailman"
   run newlist \
     --quiet \
     --emailhost="${fml_cf[DOMAINNAME]}" \
@@ -179,6 +188,7 @@ for ml_name in *; do
   echo "$mm_admin_pass" >"$mm_ml_dir/adminpass" \
     || exit 1
 
+  pinfo "Migrating list configuration to Mailman"
   {
     echo "m.real_name = '$ml_name'"
     echo "m.reject_these_nonmembers = ['^(${fml_cf[REJECT_ADDR]})@']"
@@ -225,6 +235,8 @@ for ml_name in *; do
       ;
   )
 
+  pinfo "Migrating list members to Mailman"
+
   touch "$tmp_dir/$ml_name.regular-members" "$tmp_dir/$ml_name.digest-members"
   sed -n '/^[^#]/p' "$ml_name/actives" \
   |while read -r address options; do
@@ -258,18 +270,27 @@ for ml_name in *; do
     "$ml_name" \
     || exit 1
 
-  if ls "$ml_name/spool" 2>/dev/null |grep '^[1-9][0-9]*$' >/dev/null; then
-    (cd "$ml_name/spool" && packmbox.pl) >"$mm_mbox.fml" \
-      || exit 1
+  pinfo "Migrating list archive to Mailman"
 
-    if [[ ${fml_cf[AUTO_HTML_GEN]} -eq 1 && -s $mm_mbox.fml ]]; then
-      run arch \
-	--quiet \
-	--wipe \
-	"$ml_name" \
-	"$mm_mbox.fml" \
-	|| exit 1
-    fi
+  from_dummy="From dummy  $(LC_ALL=C TZ= date +'%a %b %e %H:%M:%S %Y')"
+  ls "$ml_name/spool" 2>/dev/null \
+  |grep '^[1-9][0-9]*$' \
+  |sort -n \
+  |while read n; do \
+    echo "$from_dummy" >>"$mm_mbox.fml"
+    sed 's/^>*From />&/' "$ml_name/spool/$n" >>"$mm_mbox.fml"
+    echo >>"$mm_mbox.fml"
+  done
+
+  if [[ ${fml_cf[AUTO_HTML_GEN]} -eq 1 && -s $mm_mbox.fml ]]; then
+    run arch \
+      --quiet \
+      --wipe \
+      "$ml_name" \
+      "$mm_mbox.fml" \
+      || exit 1
   fi
+
+  pinfo "End: $ml_name"
 done
 
