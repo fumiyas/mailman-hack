@@ -200,9 +200,10 @@ pinfo "Migrating list configuration to Mailman"
   echo "m.reply_goes_to_list = $mm_reply_goes_to_list"
   echo "m.archive_volume_frequency = $mm_archive_volume_frequency"
 
-  if [[ -f members-admin ]]; then
+  if [[ -f members-admin || -f include-admin ]]; then
     echo "m.owner += ["
-    sed -n 's/\([^#].*\)/"\1",/p' members-admin
+    cat members-admin include-admin 2>/dev/null \
+    |sed -n 's/\([^#].*\)/"\1",/p'
     echo ']'
   fi
   if [[ -f moderators ]]; then
