@@ -229,7 +229,7 @@ pinfo "Migrating list configuration to Mailman"
 
   echo 'm.Save()'
 } \
-|tee /dev/stderr \
+|tee -a /dev/stderr \
 |run withlist --quiet --lock "$ml_name_lower" \
   || exit 1
 
