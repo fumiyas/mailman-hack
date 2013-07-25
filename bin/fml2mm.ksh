@@ -56,6 +56,9 @@ if [[ -d $mm_ml_dir ]]; then
 fi
 
 cd "$fml_list_dir" || exit 1
+if [[ ! -f cf ]]; then
+  pdie "fml cf file not found"
+fi
 
 ## ======================================================================
 
