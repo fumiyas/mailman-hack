@@ -155,6 +155,11 @@ if [[ -n ${fml_cf[SUBJECT_TAG_TYPE]} ]]; then
   mm_subject_prefix="$mm_subject_prefix "
 fi
 
+mm_archive='True'
+if [[ ${fml_cf[NOT_USE_SPOOL]-0} = 1 && ${fml_cf[AUTO_HTML_GEN]-0} != 1 ]]; then
+  mm_archive='False'
+fi
+
 case "${fml_cf[HTML_INDEX_UNIT]-}" in
 infinite)
   ## Yearly
@@ -202,6 +207,7 @@ pinfo "Migrating list configuration to Mailman"
   echo "m.subscribe_policy = $mm_subscribe_policy"
   echo "m.generic_nonmember_action = $mm_generic_nonmember_action"
   echo "m.reply_goes_to_list = $mm_reply_goes_to_list"
+  echo "m.archive = $mm_archive"
   echo "m.archive_volume_frequency = $mm_archive_volume_frequency"
 
   if [[ -f members-admin || -f include-admin ]]; then
@@ -302,13 +308,15 @@ done \
 
 chown "$mm_user:" "$mm_mbox.fml"
 
-if [[ ${fml_cf[AUTO_HTML_GEN]} -eq 1 && -s $mm_mbox.fml ]]; then
+if [[ -s $mm_mbox.fml ]]; then
   run arch \
     --quiet \
     --wipe \
     "$ml_name" \
     "$mm_mbox.fml" \
     || exit 1
+else
+  rm "$mm_mbox.fml"
 fi
 
 ## ======================================================================
