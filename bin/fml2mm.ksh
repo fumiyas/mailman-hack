@@ -32,6 +32,7 @@ tmp_dir=$(mktemp -d /tmp/${0##*/}.XXXXXXXX) \
 trap 'rm -rf "$tmp_dir"; trap - EXIT; exit 1' HUP INT
 trap 'rm -rf "$tmp_dir"' EXIT
 
+mm_user="${MM_USER-mailman}"
 mm_sbin_dir="${MM_SBIN_DIR-/opt/osstech/sbin}"
 mm_lists_dir="${MM_LISTS_DIR-/opt/osstech/var/lib/mailman/lists}"
 mm_archive_dir="${MM_ARCHIVE_DIR-/opt/osstech/var/lib/mailman/archives}"
@@ -298,6 +299,8 @@ ls spool 2>/dev/null \
 done \
 >"$mm_mbox.fml" \
 ;
+
+chown "$mm_user:" "$mm_mbox.fml"
 
 if [[ ${fml_cf[AUTO_HTML_GEN]} -eq 1 && -s $mm_mbox.fml ]]; then
   run arch \
