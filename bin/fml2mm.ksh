@@ -227,9 +227,9 @@ pinfo "Migrating list configuration to Mailman"
   fi
 
   echo "m.accept_these_nonmembers += ["
-  diff \
-    <(sed -n 's/^\([^# 	]*\).*$/\1/p;' members) \
-    <(sed -n 's/^\([^# 	]*\).*$/\1/p;' actives) \
+  diff -i \
+    <(sed -n 's/^\([^# 	]*\).*$/\1/p;' members |sort -uf) \
+    <(sed -n 's/^\([^# 	]*\).*$/\1/p;' actives |sort -uf) \
   |sed -n 's/^< \(.*\)$/"\1",/p' \
   ;
   echo ']'
