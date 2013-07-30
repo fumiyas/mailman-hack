@@ -1,7 +1,12 @@
 #!/bin/ksh
 ##
+## General purpose fml to Mailman migration tool
+## Copyright (c) 2013 SATOH Fumiyas @ OSS Technology Corp., Japan
+##
+## License: GNU General Public License version 3
+##
 ## WARNING:
-##	Cannot migrate $START_HOOK in fml cf
+##	Cannot migrate $START_HOOK and so on in fml cf
 ##
 
 set -u
