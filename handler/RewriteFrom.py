@@ -19,7 +19,7 @@ REWRITE_FROM = {
 	'from_address':	'%(list_address)s',
     },
     ## For all lists
-    'list-name-bar': {
+    '*': {
 	'from_name':	'%(from_name)s {%(from_address)s}',
 	'from_address':	'%(list_address)s',
 	'save_original':'X-Original-From',
