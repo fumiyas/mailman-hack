@@ -1,6 +1,6 @@
 #!/bin/ksh
 ##
-## General purpose fml to Mailman migration tool
+## General purpose fml 4.0 to Mailman 2.1 migration tool
 ## Copyright (c) 2013 SATOH Fumiyas @ OSS Technology Corp., Japan
 ##
 ## License: GNU General Public License version 3
@@ -192,7 +192,7 @@ pinfo "Creating Mailman list"
 run newlist \
   --quiet \
   --emailhost="${fml_cf[DOMAINNAME]}" \
-  --urlhost="$mm_url_host" \
+  ${mm_url_host+--urlhost="$mm_url_host"} \
   "$ml_name" \
   "$mm_admin" \
   "$mm_admin_pass" \
