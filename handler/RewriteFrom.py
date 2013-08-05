@@ -51,7 +51,7 @@ def process(mlist, msg, msgdata):
 	return
 
     from_name_fmt = conf.get('from_name', '%(from_name)s')
-    from_address_fmt = conf.get('from_address', , '%(from_address)s')
+    from_address_fmt = conf.get('from_address', '%(from_address)s')
     save_original = conf.get('save_original')
 
     d = SafeDict({'list_real_name':	mlist.real_name,
