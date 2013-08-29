@@ -215,7 +215,9 @@ pinfo "Migrating list configuration to Mailman"
   if [[ -f members-admin || -f include-admin ]]; then
     echo "m.owner += ["
     cat members-admin include-admin 2>/dev/null \
-    |sed -n 's/\([^#].*\)/"\1",/p'
+    |sed -n 's/\([^#].*\)/"\1",/p' \
+    |sort -uf \
+    ;
     echo ']'
   fi
   if [[ -f moderators ]]; then
