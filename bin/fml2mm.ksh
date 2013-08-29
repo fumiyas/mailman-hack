@@ -130,10 +130,7 @@ fi
 
 mm_subject_prefix=''
 if [[ -n ${fml_cf[SUBJECT_TAG_TYPE]} ]]; then
-  mm_subject_post_id_fmt='%d'
-  if [[ -n ${fml_cf[SUBJECT_FORM_LONG_ID]-} ]]; then
-    mm_subject_post_id_fmt="%0${fml_cf[SUBJECT_FORM_LONG_ID]}d"
-  fi
+  mm_subject_post_id_fmt="%0${fml_cf[SUBJECT_FORM_LONG_ID]-5}d"
   case "${fml_cf[SUBJECT_TAG_TYPE]}" in
   '( )'|'[ ]')
     mm_subject_prefix="${fml_cf[SUBJECT_TAG_TYPE]/ /${fml_cf[BRACKET]} $mm_subject_post_id_fmt}"
