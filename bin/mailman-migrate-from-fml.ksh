@@ -1,6 +1,6 @@
 #!/bin/ksh
 ##
-## General purpose fml 4.0 to Mailman 2.1 migration tool
+## Mailman 2: Migrate from fml 4.0
 ## Copyright (c) 2013 SATOH Fumiyas @ OSS Technology Corp., Japan
 ##
 ## License: GNU General Public License version 3
@@ -203,9 +203,9 @@ echo "$mm_admin_pass" >"$mm_ml_dir/adminpass" \
 pinfo "Migrating list configuration to Mailman"
 
 {
-  echo "m.real_name = '$ml_name'"
-  echo "m.reject_these_nonmembers = ['^(${fml_cf[REJECT_ADDR]})@']"
-  echo "m.subject_prefix = '$mm_subject_prefix'"
+  echo "m.real_name = '''$ml_name'"
+  echo "m.reject_these_nonmembers = ['''^(${fml_cf[REJECT_ADDR]})@''']"
+  echo "m.subject_prefix = '''$mm_subject_prefix'''"
   echo "m.subscribe_policy = $mm_subscribe_policy"
   echo "m.generic_nonmember_action = $mm_generic_nonmember_action"
   echo "m.reply_goes_to_list = $mm_reply_goes_to_list"
@@ -215,14 +215,14 @@ pinfo "Migrating list configuration to Mailman"
   if [[ -f members-admin || -f include-admin ]]; then
     echo "m.owner += ["
     cat members-admin include-admin 2>/dev/null \
-    |sed -n 's/\([^#].*\)/"\1",/p' \
+    |sed -n 's/\([^#].*\)/"""\1""",/p' \
     |sort -uf \
     ;
     echo ']'
   fi
   if [[ -f moderators ]]; then
     echo "m.moderator += ["
-    sed -n 's/\([^#].*\)/"\1",/p' moderators
+    sed -n 's/\([^#].*\)/"""\1""",/p' moderators
     echo ']'
   fi
 
