@@ -21,6 +21,16 @@ def run(mlist, *args):
     if pid == 0:
 	os.execvp(args[0], args)
 
+    ## FIXME: Setenv:
+    ## bindir
+    ## privatedir
+    ## m.real_name
+    ## m.owner
+    ## m.moderator
+    ## m.post_id
+    ## m.archive
+    ## m.web_page_url
+
     pid_exited, status = os.waitpid(pid, 0)
     sys.exit(status >> 8)
 
