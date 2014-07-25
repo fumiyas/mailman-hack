@@ -21,6 +21,8 @@
 e.g., in mm_cfg.py:
 
 GLOBAL_PIPELINE.insert(GLOBAL_PIPELINE.index('CookHeaders'), 'SubjectRe')
+
+NOTE: If you use subject_prefix on all lists, this handler is not required.
 """
 
 from __future__ import nested_scopes
