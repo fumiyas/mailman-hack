@@ -75,6 +75,10 @@ def change_header(name, value, mlist, msg, msgdata, delete=True, repl=True):
 
 
 def process(mlist, msg, msgdata):
+    ## Same process is done by CookHeaders.py if subject_prefix is enabled
+    prefix = mlist.subject_prefix.strip()
+    if prefix:
+        return
     # VirginRunner sets _fasttrack for internally crafted messages.
     fasttrack = msgdata.get('_fasttrack')
     if not msgdata.get('isdigest') and not fasttrack:
