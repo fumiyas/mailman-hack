@@ -34,6 +34,7 @@ from email.Errors import HeaderParseError
 from Mailman import Utils
 
 RECOLON = 'Re:'
+ORIGINAL_SUBJECT = 'X-Original-Subject'
 
 # True/False
 try:
@@ -115,6 +116,8 @@ def fix_subject_re(mlist, msg, msgdata):
     rematch = re.match('((RE|AW|SV|VS)\s*(\[\d+\])?\s*:\s*)+', subject, re.I)
     if not rematch:
         return
+
+    msg[ORIGINAL_SUBJECT] = msg['Subject']
 
     subject = subject[rematch.end():]
     # If charset is 'us-ascii', try to concatnate as string because there
