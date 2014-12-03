@@ -2,6 +2,14 @@
 
 ## FIXME: Mail archive in $dir/$name/archive/* by sequencer -N
 
+## TODO:
+##	approve_pass = password (for moderator?)
+##	moderate = yes
+##	moderator = moderator@example.jp
+##	restrict_post = filename
+##	subject_prefix = [mlname]
+##	taboo_headers
+
 use strict;
 use warnings;
 
