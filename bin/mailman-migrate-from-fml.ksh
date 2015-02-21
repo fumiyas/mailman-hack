@@ -1,12 +1,12 @@
 #!/bin/ksh
 ##
 ## Mailman 2: Migrate from fml 4.0
-## Copyright (c) 2013 SATOH Fumiyas @ OSS Technology Corp., Japan
+## Copyright (c) 2013-2015 SATOH Fumiyas @ OSS Technology Corp., Japan
 ##
 ## License: GNU General Public License version 3
 ##
 ## WARNING:
-##	Cannot migrate $START_HOOK and so on in fml cf
+##	Cannot migrate $START_HOOK and so on in fml config.ph
 ##
 
 set -u
@@ -62,22 +62,26 @@ if [[ -d $mm_ml_dir ]]; then
 fi
 
 cd "$fml_list_dir" || exit 1
-if [[ ! -f cf ]]; then
-  pdie "fml cf file not found"
+if [[ ! -f config.ph ]]; then
+  pdie "fml config.ph file not found"
 fi
 
 ## ======================================================================
 
-pinfo "Reading fml cf file"
+pinfo "Reading fml config.ph file"
 
 typeset -A fml_cf
 typeset -u cf_name
 
 sed \
-  -e 's/^ *&*DEFINE_FIELD_FORCED(.\(.*\)., *["'"'"']\?\(.*\)["'"'"']\?);/\1 \2/p' \
-  cf \
-|sed -n '/^[A-Za-z][A-Za-z_\-]*[ 	][ 	]*/p' \
+  -n \
+  -e 's/^\$\([A-Za-z][A-Za-z_]*\)[ 	]*=[ 	]*\(.*\);$/\1 \2/p' \
+  -e 's/^[ 	]*&*DEFINE_FIELD_FORCED(.\([^"'"'"']*\).[ 	]*,[ 	]*\([^)]*\).*$/\1 \2/p' \
+  config.ph \
 |while read -r cf_name cf_value; do
+  cf_value="${cf_value#[\"\']}"
+  cf_value="${cf_value%[\"\']}"
+  cf_value="${cf_value//\\@/@}"
   fml_cf[$cf_name]="${cf_value/\$DOMAINNAME/${fml_cf[DOMAINNAME]-}}"
   #echo "fml_cf[$cf_name]='${fml_cf[$cf_name]}'"
 done
