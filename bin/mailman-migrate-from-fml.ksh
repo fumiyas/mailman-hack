@@ -317,7 +317,7 @@ if [[ -d spool ]] && ls -fF spool |grep '^[1-9][0-9]*$' >/dev/null; then
     sed 's/^>*From />&/' "spool/$n"
     echo
   done \
-  >"$mm_mbox.fml" \
+  |run tee "$mm_mbox.fml" >/dev/null \
   ;
 
   run chown "$mm_user:" "$mm_mbox.fml"
