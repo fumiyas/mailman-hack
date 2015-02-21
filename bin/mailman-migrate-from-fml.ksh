@@ -207,7 +207,7 @@ echo "$mm_admin_pass" >"$mm_ml_dir/adminpass" \
 pinfo "Migrating list configuration to Mailman"
 
 {
-  echo "m.real_name = '''$ml_name'"
+  echo "m.real_name = '''$ml_name'''"
   echo "m.reject_these_nonmembers = ['''^(${fml_cf[REJECT_ADDR]})@''']"
   echo "m.subject_prefix = '''$mm_subject_prefix'''"
   echo "m.subscribe_policy = $mm_subscribe_policy"
