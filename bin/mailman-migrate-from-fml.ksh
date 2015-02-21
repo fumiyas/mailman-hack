@@ -15,7 +15,7 @@ umask 0027
 cmd_arg0="$0"
 
 function pinfo {
-  echo "INFO: $1"
+  echo "INFO: $1" 1>&2
 }
 
 function perr {
@@ -28,8 +28,12 @@ function pdie {
 }
 
 function run {
-  pinfo "Run command: $*"
-  "$@"
+  pinfo "Run command: $*" 1>&2
+  if [[ -n ${NO_RUN+set} ]]; then
+    [[ -t 0 ]] || cat >/dev/null
+  else
+    "$@"
+  fi
 }
 
 tmp_dir=$(mktemp -d /tmp/${0##*/}.XXXXXXXX) \
@@ -199,7 +203,7 @@ run newlist \
   "$mm_admin_pass" \
   || exit 1
 
-echo "$mm_admin_pass" >"$mm_ml_dir/adminpass" \
+echo "$mm_admin_pass" |run tee "$mm_ml_dir/adminpass" >/dev/null \
   || exit 1
 
 ## ======================================================================
@@ -245,7 +249,7 @@ pinfo "Migrating list configuration to Mailman"
 
   echo 'm.Save()'
 } \
-|tee -a /dev/stderr \
+|tee >(sed 's/^/INFO: Mailman withlist: /' 1>&2) \
 |run withlist --quiet --lock "$ml_name_lower" \
   || exit 1
 
@@ -315,7 +319,7 @@ done \
 >"$mm_mbox.fml" \
 ;
 
-chown "$mm_user:" "$mm_mbox.fml"
+run chown "$mm_user:" "$mm_mbox.fml"
 
 if [[ -s $mm_mbox.fml ]]; then
   run arch \
@@ -325,7 +329,7 @@ if [[ -s $mm_mbox.fml ]]; then
     "$mm_mbox.fml" \
     || exit 1
 else
-  rm "$mm_mbox.fml"
+  run rm "$mm_mbox.fml"
 fi
 
 ## ======================================================================
