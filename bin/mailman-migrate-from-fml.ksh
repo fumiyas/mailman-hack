@@ -230,6 +230,7 @@ pinfo "Migrating list configuration to Mailman"
     echo "m.post_id = $mm_postid"
   fi
 
+  ## FIXME: Add to members and call mlist.setDeliveryStatus(addr, MemberAdaptor.BYADMIN)
   echo "m.accept_these_nonmembers += ["
   diff -i \
     <(sed -n 's/^\([^# 	]*\).*$/\1/p;' members |sort -uf) \
