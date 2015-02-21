@@ -304,32 +304,32 @@ run add_members \
 
 ## ======================================================================
 
-pinfo "Migrating list archive to Mailman"
+if [[ -d spool ]] && ls -fF spool |grep '^[1-9][0-9]*$' >/dev/null; then
+  pinfo "Migrating list archive to Mailman"
 
-from_dummy="From dummy  $(LC_ALL=C TZ= date +'%a %b %e %H:%M:%S %Y')"
+  from_dummy="From dummy  $(LC_ALL=C TZ= date +'%a %b %e %H:%M:%S %Y')"
 
-ls spool 2>/dev/null \
-|grep '^[1-9][0-9]*$' \
-|sort -n \
-|while read n; do \
-  echo "$from_dummy"
-  sed 's/^>*From />&/' "spool/$n"
-  echo
-done \
->"$mm_mbox.fml" \
-;
+  ls -fF spool \
+  |grep '^[1-9][0-9]*$' \
+  |sort -n \
+  |while read n; do \
+    echo "$from_dummy"
+    sed 's/^>*From />&/' "spool/$n"
+    echo
+  done \
+  >"$mm_mbox.fml" \
+  ;
 
-run chown "$mm_user:" "$mm_mbox.fml"
+  run chown "$mm_user:" "$mm_mbox.fml"
 
-if [[ -s $mm_mbox.fml ]]; then
-  run arch \
-    --quiet \
-    --wipe \
-    "$ml_name" \
-    "$mm_mbox.fml" \
-    || exit 1
-else
-  run rm "$mm_mbox.fml"
+  if [[ -s $mm_mbox.fml ]]; then
+    run arch \
+      --quiet \
+      --wipe \
+      "$ml_name" \
+      "$mm_mbox.fml" \
+      || exit 1
+  fi
 fi
 
 ## ======================================================================
