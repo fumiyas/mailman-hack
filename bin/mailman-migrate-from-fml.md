@@ -10,6 +10,24 @@ fml → Mailman 移行スクリプト
 
 あとでかく、きっとかく。
 
+### 実行
+
+```console
+# mailman-migrate-from-fml.ksh <fmlメーリングリストディレクトリ> [<URLホスト>]
+```
+
+### 移行元データ
+
+  * `fml メーリングリストディレクトリ/`
+    * `config.ph`
+    * `seq`
+    * `members-admin`
+    * `include-admin`
+    * `moderators`
+    * `actives`
+    * `members`
+    * `spool/*` (任意)
+
 移行対象
 ----------------------------------------------------------------------
 
