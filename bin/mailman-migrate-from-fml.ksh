@@ -41,6 +41,9 @@ tmp_dir=$(mktemp -d /tmp/${0##*/}.XXXXXXXX) \
 trap 'rm -rf "$tmp_dir"; trap - EXIT; exit 1' HUP INT
 trap 'rm -rf "$tmp_dir"' EXIT
 
+log="$tmp_dir/${0##*/}.$(date '+%Y%m%d.%H%M%S').log"
+exec 2> >(tee "$log" 1>&2)
+
 mm_user="${MM_USER-mailman}"
 mm_sbin_dir="${MM_SBIN_DIR-/opt/osstech/sbin}"
 mm_lists_dir="${MM_LISTS_DIR-/opt/osstech/var/lib/mailman/lists}"
@@ -255,8 +258,6 @@ pinfo "Migrating list configuration to Mailman"
 |run withlist --quiet --lock "$ml_name_lower" \
   || exit 1
 
-echo
-
 ## ======================================================================
 
 ## FIXME: Migrate header filter
@@ -335,6 +336,8 @@ if [[ -d spool ]] && ls -fF spool |grep '^[1-9][0-9]*$' >/dev/null; then
 fi
 
 ## ======================================================================
+
+mv "$log" "$mm_ml_dir/"
 
 exit 0
 
