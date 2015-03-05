@@ -6,7 +6,10 @@
 ## License: GNU General Public License version 3
 ##
 ## WARNING:
-##	Cannot migrate $START_HOOK and so on in fml config.ph
+##	Cannot migrate the following configuration  in a fml config.ph
+##	  * $START_HOOK
+##	  * &ADD_CONTENT_HANDLER()
+##	  * and more...
 ##
 
 set -u
