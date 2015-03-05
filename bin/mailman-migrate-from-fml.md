@@ -19,14 +19,14 @@ fml → Mailman 移行スクリプト
 ### 移行元データ
 
   * `fml メーリングリストディレクトリ/`
-    * `config.ph`
-    * `seq`
-    * `members-admin`
-    * `include-admin`
-    * `moderators`
-    * `actives`
-    * `members`
-    * `spool/*` (任意)
+    * `config.ph` (設定)
+    * `seq` (連番)
+    * `members-admin` (管理者アドレス)
+    * `include-admin` (管理者アドレス)
+    * `moderators` (司会者アドレス)
+    * `actives` (会員アドレス)
+    * `members` (投稿者アドレス)
+    * `spool/*` (保存書庫。任意)
 
 移行対象
 ----------------------------------------------------------------------
