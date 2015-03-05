@@ -6,9 +6,9 @@
 ## License: GNU General Public License version 3
 ##
 ## WARNING:
-##	Cannot migrate the following configuration  in a fml config.ph
+##	Cannot migrate the following configuration in a fml config.ph:
 ##	  * $START_HOOK
-##	  * &ADD_CONTENT_HANDLER()
+##	  * &ADD_CONTENT_HANDLER() (FIXME)
 ##	  * and more...
 ##
 
@@ -55,12 +55,13 @@ mm_archive_dir="${MM_ARCHIVE_DIR-/opt/osstech/var/lib/mailman/archives}"
 export PATH="$mm_sbin_dir:$(cd "${0%/*}" && pwd):$PATH" || exit 1
 unset PYTHONPATH
 
-if [[ $# -lt 1 || $# -gt 2 ]]; then
-  echo "Usage: $0 FML_LIST_DIR [URL_HOST]"
+if [[ $# -lt 2 || $# -gt 3 ]]; then
+  echo "Usage: $0 FML_LIST_DIR FML_ALIASES [URL_HOST]"
   exit 1
 fi
 
 fml_list_dir="$1"; shift
+fml_aliases="$1"; shift
 mm_url_host="${1-}"; ${1+shift}
 
 typeset -l ml_name_lower
@@ -228,14 +229,50 @@ pinfo "Migrating list configuration to Mailman"
   echo "m.archive = $mm_archive"
   echo "m.archive_volume_frequency = $mm_archive_volume_frequency"
 
-  if [[ -f members-admin || -f include-admin ]]; then
-    echo "m.owner += ["
-    cat members-admin include-admin 2>/dev/null \
-    |sed -n 's/\([^#].*\)/"""\1""",/p' \
-    |sort -uf \
+  echo "m.owner += ["
+  (
+    ## Migrate owner addresses from the fml aliases file
+    ## FIXME: Support ":include:/path/to/file"-style entries
+    ## (1) Append a blank line after aliases
+    ##     (This is required for sed unwrap script)
+    ## (2) Remove comments
+    ## (3) Normalize separators
+    ## (4) Unwrap lines
+    ## (5) Append @DOMAINNAME if @ does not exist
+    ## (6) Enclode addresses by triple-quotations
+    (
+      cat "$fml_aliases"
+      echo
+    ) \
+    |sed \
+      -e 's/#.*//' \
+      -e 's/[ 	,][ 	,]*/ /g' \
+    |sed -n \
+      -e '1 {h; $ !d}' \
+      -e '$ {x; s/\n / /g; p}' \
+      -e '/^ / {H; d}' \
+      -e '/^ /! {x; s/\n / /g; p}' \
+    |grep -i "^$ml_name *:" \
+    |sed \
+      -e 's/^[^:]*: *//' \
+      -e 's/ /\n/g' \
     ;
-    echo ']'
-  fi
+    sed \
+      -e 's/#.*//' \
+      -e '/^$/d' \
+      members-admin \
+      include-admin \
+      2>/dev/null \
+    ;
+  ) \
+  |sed \
+    -e "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
+    -e 's/^/"""/' \
+    -e 's/$/"""/' \
+  |sort -uf \
+  ;
+  echo ']'
+
   if [[ -f moderators ]]; then
     echo "m.moderator += ["
     sed -n 's/\([^#].*\)/"""\1""",/p' moderators
@@ -306,7 +343,8 @@ run add_members \
   --welcome-msg=n \
   --admin-notify=n \
   "$ml_name" \
-  || exit 1
+  || exit 1 \
+;
 
 ## ======================================================================
 
@@ -334,7 +372,8 @@ if [[ -d spool ]] && ls -fF spool |grep '^[1-9][0-9]*$' >/dev/null; then
       --wipe \
       "$ml_name" \
       "$mm_mbox.fml" \
-      || exit 1
+      || exit 1 \
+    ;
   fi
 fi
 
