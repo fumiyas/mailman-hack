@@ -44,8 +44,8 @@ tmp_dir=$(mktemp -d /tmp/${0##*/}.XXXXXXXX) \
 trap 'rm -rf "$tmp_dir"; trap - EXIT; exit 1' HUP INT
 trap 'rm -rf "$tmp_dir"' EXIT
 
-log="$tmp_dir/${0##*/}.$(date '+%Y%m%d.%H%M%S').log"
-exec 2> >(tee "$log" 1>&2)
+#log="$tmp_dir/${0##*/}.$(date '+%Y%m%d.%H%M%S').log"
+#exec 2> >(tee "$log" 1>&2)
 
 mm_user="${MM_USER-mailman}"
 mm_sbin_dir="${MM_SBIN_DIR-/opt/osstech/sbin}"
@@ -379,7 +379,7 @@ fi
 
 ## ======================================================================
 
-mv "$log" "$mm_ml_dir/"
+#mv "$log" "$mm_ml_dir/"
 
 exit 0
 
