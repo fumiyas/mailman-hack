@@ -229,7 +229,7 @@ pinfo "Migrating list configuration to Mailman"
   echo "m.archive = $mm_archive"
   echo "m.archive_volume_frequency = $mm_archive_volume_frequency"
 
-  echo "m.owner += ["
+  echo "m.owner = ["
   (
     ## Migrate owner addresses from the fml aliases file
     ## FIXME: Support ":include:/path/to/file"-style entries
@@ -252,7 +252,7 @@ pinfo "Migrating list configuration to Mailman"
       -e '$ {x; s/\n / /g; p}' \
       -e '/^ / {H; d}' \
       -e '/^ /! {x; s/\n / /g; p}' \
-    |grep -i "^$ml_name *:" \
+    |grep -i "^$ml_name-admin *:" \
     |sed \
       -e 's/^[^:]*: *//' \
       -e 's/ /\n/g' \
@@ -268,13 +268,13 @@ pinfo "Migrating list configuration to Mailman"
   |sed \
     -e "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
     -e 's/^/"""/' \
-    -e 's/$/"""/' \
+    -e 's/$/""",/' \
   |sort -uf \
   ;
   echo ']'
 
   if [[ -f moderators ]]; then
-    echo "m.moderator += ["
+    echo "m.moderator = ["
     sed -n 's/\([^#].*\)/"""\1""",/p' moderators
     echo ']'
   fi
