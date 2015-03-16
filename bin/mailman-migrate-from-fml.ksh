@@ -51,6 +51,7 @@ trap 'rm -rf "$tmp_dir"' EXIT
 #exec 2> >(tee "$log" 1>&2)
 
 mm_user="${MAILMAN_USER-mailman}"
+mm_site_email="${MAILMAN_SITE_EMAIL-fml}"
 mm_dir="${MAILMAN_DIR-/opt/osstech/lib/mailman}"
 mm_var_dir="${MAILMAN_VAR_DIR-/opt/osstech/var/lib/mailman}"
 mm_lists_dir="${MAILMAN_LISTS_DIR-$mm_var_dir/lists}"
@@ -266,6 +267,7 @@ pinfo "Migrating list configuration to Mailman"
     ;
   ) \
   |sed \
+    -e "s/^fml\$/$mm_site_email/" \
     -e "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
     -e 's/^/"""/' \
     -e 's/$/""",/' \

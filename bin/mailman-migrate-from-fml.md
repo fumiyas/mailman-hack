@@ -32,6 +32,8 @@ fml → Mailman 移行スクリプト
 
   * `MAILMAN_USER` (mailman)
     * Mailman の実行ユーザーを指定する。
+  * `MAILMAN_SITE_EMAIL` (fml)
+    * fml の代表メールアドレス fml の移行先メールアドレスを指定する。
   * `MAILMAN_DIR` (`/opt/osstech/lib/mailman`)
     * Mailman のインストールディレクトリを指定する。
   * `MAILMAN_VAR_DIR` (`/opt/osstech/var/lib/mailman`)
