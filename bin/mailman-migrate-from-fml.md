@@ -28,6 +28,15 @@ fml → Mailman 移行スクリプト
     * `members` (投稿者アドレス)
     * `spool/*` (保存書庫。任意)
 
+### 環境変数
+
+  * `MAILMAN_USER` (mailman)
+    * Mailman の実行ユーザーを指定する。
+  * `MAILMAN_DIR` (`/opt/osstech/lib/mailman`)
+    * Mailman のインストールディレクトリを指定する。
+  * `MAILMAN_VAR_DIR` (`/opt/osstech/var/lib/mailman`)
+    * Mailman のデータディレクトリを指定する。
+
 移行対象
 ----------------------------------------------------------------------
 

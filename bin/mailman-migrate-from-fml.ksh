@@ -15,6 +15,9 @@
 set -u
 umask 0027
 
+export LC_ALL=C
+unset PYTHONPATH
+
 cmd_arg0="$0"
 
 function pinfo {
@@ -47,13 +50,11 @@ trap 'rm -rf "$tmp_dir"' EXIT
 #log="$tmp_dir/${0##*/}.$(date '+%Y%m%d.%H%M%S').log"
 #exec 2> >(tee "$log" 1>&2)
 
-mm_user="${MM_USER-mailman}"
-mm_sbin_dir="${MM_SBIN_DIR-/opt/osstech/sbin}"
-mm_lists_dir="${MM_LISTS_DIR-/opt/osstech/var/lib/mailman/lists}"
-mm_archive_dir="${MM_ARCHIVE_DIR-/opt/osstech/var/lib/mailman/archives}"
-
-export PATH="$mm_sbin_dir:$(cd "${0%/*}" && pwd):$PATH" || exit 1
-unset PYTHONPATH
+mm_user="${MAILMAN_USER-mailman}"
+mm_dir="${MAILMAN_DIR-/opt/osstech/lib/mailman}"
+mm_var_dir="${MAILMAN_VAR_DIR-/opt/osstech/var/lib/mailman}"
+mm_lists_dir="${MAILMAN_LISTS_DIR-$mm_var_dir/lists}"
+mm_archives_dir="${MAILMAN_ARCHIVES_DIR-$mm_var_dir/archives}"
 
 if [[ $# -lt 2 || $# -gt 3 ]]; then
   echo "Usage: $0 FML_LIST_DIR FML_ALIASES [URL_HOST]"
@@ -103,7 +104,7 @@ pinfo "Constructing Mailman list configuration"
 
 mm_admin="fml@${fml_cf[DOMAINNAME]}"
 mm_postid=$(cat seq 2>/dev/null) && let mm_postid++
-mm_mbox="$mm_archive_dir/private/$ml_name_lower.mbox/$ml_name_lower.mbox"
+mm_mbox="$mm_archives_dir/private/$ml_name_lower.mbox/$ml_name_lower.mbox"
 mm_admin_pass=$(printf '%04x%04x%04x%04x' $RANDOM $RANDOM $RANDOM $RANDOM)
 mm_reply_goes_to_list=1 ## "Reply-To: This list" by default
 mm_max_message_size=$((${fml_cf[INCOMING_MAIL_SIZE_LIMIT]:-0} / 1024))
@@ -202,7 +203,7 @@ esac
 
 pinfo "Creating Mailman list"
 
-run newlist \
+run "$mm_dir/bin/newlist" \
   --quiet \
   --emailhost="${fml_cf[DOMAINNAME]}" \
   ${mm_url_host+--urlhost="$mm_url_host"} \
@@ -294,7 +295,7 @@ pinfo "Migrating list configuration to Mailman"
   echo 'm.Save()'
 } \
 |tee >(sed 's/^/INFO: Mailman withlist: /' 1>&2) \
-|run withlist --quiet --lock "$ml_name_lower" \
+|run "$mm_dir/bin/withlist" --quiet --lock "$ml_name_lower" \
   || exit 1
 
 ## ======================================================================
@@ -336,7 +337,7 @@ sed -n '/^[^#]/p' actives \
   fi
 done \
 
-run add_members \
+run "$mm_dir/bin/add_members" \
   --regular-members-file="$tmp_dir/$ml_name.regular-members" \
   --digest-members-file="$tmp_dir/$ml_name.digest-members" \
   --welcome-msg=n \
@@ -366,7 +367,7 @@ if [[ -d spool ]] && ls -fF spool |grep '^[1-9][0-9]*$' >/dev/null; then
   run chown "$mm_user:" "$mm_mbox.fml"
 
   if [[ -s $mm_mbox.fml ]]; then
-    run arch \
+    run "$mm_dir/bin/arch" \
       --quiet \
       --wipe \
       "$ml_name" \
