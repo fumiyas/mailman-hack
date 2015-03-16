@@ -233,14 +233,13 @@ pinfo "Migrating list configuration to Mailman"
   (
     ## Migrate owner addresses from the fml aliases file
     ## FIXME: Support ":include:/path/to/file"-style entries
-    ## (1) Append a blank line after aliases
-    ##     (This is required for sed unwrap script)
-    ## (2) Remove comments
-    ## (3) Normalize separators
-    ## (4) Unwrap lines
-    ## (5) Append @DOMAINNAME if @ does not exist
-    ## (6) Enclode addresses by triple-quotations
+    ## (1) Remove comments
+    ## (2) Normalize separators
+    ## (3) Unwrap lines
+    ## (4) Append @DOMAINNAME if @ does not exist
+    ## (5) Enclode addresses by triple-quotations
     (
+      ## Append a blank line after aliases (This is required for sed unwrap script)
       cat "$fml_aliases"
       echo
     ) \
