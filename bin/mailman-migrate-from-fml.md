@@ -28,6 +28,28 @@ fml → Mailman 移行スクリプト
     * `members` (投稿者アドレス)
     * `spool/*` (保存書庫。任意)
 
+`spool/*` (保存書庫。任意) を除いて fml リストデータをアーカイブ (cpio形式) する例:
+
+```console
+# cd /var/spool/ml
+# find \
+  -mindepth 2 \
+  -maxdepth 2 \
+  ! -name log \
+  ! -name summary \
+  -type f \
+|cpio  \
+  -o \
+  >fml-list-dirs.cpio \
+;
+```
+
+cpio 形式アーカイブの展開例:
+
+```console
+# cpio -idR 0:0 <fml-list-dirs.cpio
+```
+
 ### 環境変数
 
   * `MAILMAN_USER` (mailman)
