@@ -88,7 +88,7 @@ typeset -u cf_name
 
 sed \
   -n \
-  -e 's/^\$\([A-Za-z][A-Za-z_]*\)[ 	]*=[ 	]*\(.*\);$/\1 \2/p' \
+  -e 's/^\$\([A-Za-z][A-Za-z_]*\)[ 	]*=[ 	]*\(.*\);[ 	]*$/\1 \2/p' \
   -e 's/^[ 	]*&*DEFINE_FIELD_FORCED(.\([^"'"'"']*\).[ 	]*,[ 	]*\([^)]*\).*$/\1 \2/p' \
   config.ph \
 |while read -r cf_name cf_value; do
