@@ -339,14 +339,16 @@ sed -n '/^[^#]/p' actives \
   fi
 done \
 
-run "$mm_dir/bin/add_members" \
-  --regular-members-file="$tmp_dir/$ml_name.regular-members" \
-  --digest-members-file="$tmp_dir/$ml_name.digest-members" \
-  --welcome-msg=n \
-  --admin-notify=n \
-  "$ml_name" \
-  || exit 1 \
-;
+if [[ -s $tmp_dir/$ml_name.regular-members || -s $tmp_dir/$ml_name.digest-members ]]; then
+  run "$mm_dir/bin/add_members" \
+    --regular-members-file="$tmp_dir/$ml_name.regular-members" \
+    --digest-members-file="$tmp_dir/$ml_name.digest-members" \
+    --welcome-msg=n \
+    --admin-notify=n \
+    "$ml_name" \
+    || exit 1 \
+  ;
+fi
 
 ## ======================================================================
 
