@@ -111,8 +111,11 @@ mm_admin="fml@${fml_cf[DOMAINNAME]}"
 mm_postid=$(cat seq 2>/dev/null) && let mm_postid++
 mm_mbox="$mm_archives_dir/private/$ml_name_lower.mbox/$ml_name_lower.mbox"
 mm_admin_pass=$(printf '%04x%04x%04x%04x' $RANDOM $RANDOM $RANDOM $RANDOM)
+## &DEFINE_FIELD_FORCED('reply-to',$MAIL_LIST);
+## &DEFINE_FIELD_FORCED('Reply-To' , $From_address);
 mm_reply_goes_to_list=1 ## "Reply-To: This list" by default
 mm_max_message_size=$((${fml_cf[INCOMING_MAIL_SIZE_LIMIT]:-0} / 1000))
+mm_bounce_processing='False'
 
 if [[ ${fml_cf[AUTO_REGISTRATION_TYPE]} != 'confirmation' ]]; then
   pdie "$ml_name: AUTO_REGISTRATION_TYPE='${fml_cf[AUTO_REGISTRATION_TYPE]}' not supported"
@@ -227,6 +230,7 @@ pinfo "Migrating list configuration to Mailman"
 {
   echo "m.real_name = '''$ml_name'''"
   echo "m.reject_these_nonmembers = ['''^(${fml_cf[REJECT_ADDR]})@''']"
+  echo "m.bounce_processing = $mm_bounce_processing"
   echo "m.max_message_size = $mm_max_message_size"
   echo "m.subject_prefix = '''$mm_subject_prefix'''"
   echo "m.subscribe_policy = $mm_subscribe_policy"
