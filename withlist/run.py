@@ -1,12 +1,12 @@
 #!/usr/bin/python
 ##
 ## Mailman withlist: Run command with locking list
-## Copyright (c) 2013 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Copyright (c) 2013-2015 SATOH Fumiyasu @ OSS Technology Corp., Japan
 ##
 ## License: GNU General Public License version 2 or later
 ##
 
-"""Usage: withlist -l -r run COMMAND [ARGUMENT ...]
+"""Usage: withlist -l -r run <LISTNAME> COMMAND [ARGUMENT ...]
 """
 
 import sys
