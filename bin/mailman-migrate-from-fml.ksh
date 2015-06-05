@@ -229,7 +229,7 @@ pinfo "Migrating list configuration to Mailman"
 
 {
   echo "m.real_name = '''$ml_name'''"
-  echo "m.reject_these_nonmembers = ['''^(${fml_cf[REJECT_ADDR]})@''']"
+  echo "m.discard_these_nonmembers = ['''^(${fml_cf[REJECT_ADDR]})@''']"
   echo "m.bounce_processing = $mm_bounce_processing"
   echo "m.max_message_size = $mm_max_message_size"
   echo "m.subject_prefix = '''$mm_subject_prefix'''"
