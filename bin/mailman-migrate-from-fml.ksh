@@ -120,6 +120,7 @@ mm_admin_pass=$(printf '%04x%04x%04x%04x' $RANDOM $RANDOM $RANDOM $RANDOM)
 ## &DEFINE_FIELD_FORCED('Reply-To' , $From_address);
 mm_reply_goes_to_list=1 ## "Reply-To: This list" by default
 mm_max_message_size=$((${fml_cf[INCOMING_MAIL_SIZE_LIMIT]:-0} / 1000))
+mm_forward_auto_discards='True'
 mm_bounce_processing='False'
 
 if [[ ${fml_cf[AUTO_REGISTRATION_TYPE]} != 'confirmation' ]]; then
@@ -240,7 +241,7 @@ pinfo "Migrating list configuration to Mailman"
 {
   echo "m.real_name = '''$ml_name'''"
   echo "m.discard_these_nonmembers = ['''^(${fml_cf[REJECT_ADDR]})@''']"
-  echo "m.forward_auto_discards = Yes"
+  echo "m.forward_auto_discards = $mm_forward_auto_discards"
   echo "m.bounce_processing = $mm_bounce_processing"
   echo "m.max_message_size = $mm_max_message_size"
   echo "m.subject_prefix = '''$mm_subject_prefix'''"
@@ -267,7 +268,7 @@ pinfo "Migrating list configuration to Mailman"
     ) \
     |sed \
       -e 's/#.*//' \
-      -e 's/[ 	,][ 	,]*/ /g' \
+      -e 's/[ 	,]\{1,\}/ /g' \
     |sed -n \
       -e '1 {h; $ !d}' \
       -e '$ {x; s/\n / /g; p}' \
