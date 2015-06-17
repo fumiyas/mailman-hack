@@ -46,6 +46,11 @@ function run {
   fi
 }
 
+function fml_true_p {
+  [[ ${1-} = @(|0) ]] && return 1
+  return 0
+}
+
 tmp_dir=$(mktemp -d /tmp/${0##*/}.XXXXXXXX) \
   || pdie "Cannot create temporary directory"
 trap 'rm -rf "$tmp_dir"; trap - EXIT; exit 1' HUP INT
@@ -182,6 +187,11 @@ if [[ -n ${fml_cf[SUBJECT_TAG_TYPE]} ]]; then
   mm_subject_prefix="$mm_subject_prefix "
 fi
 
+mm_include_list_post_header='No'
+if [[ ${fml_cf[USE_RFC2369]-1} = 1 ]]; then
+  mm_include_list_post_header='True'
+fi
+
 mm_archive='True'
 if [[ ${fml_cf[NOT_USE_SPOOL]-0} = 1 && ${fml_cf[AUTO_HTML_GEN]-0} != 1 ]]; then
   mm_archive='False'
@@ -237,6 +247,7 @@ pinfo "Migrating list configuration to Mailman"
   echo "m.subscribe_policy = $mm_subscribe_policy"
   echo "m.generic_nonmember_action = $mm_generic_nonmember_action"
   echo "m.reply_goes_to_list = $mm_reply_goes_to_list"
+  echo "m.include_list_post_header = $mm_include_list_post_header"
   echo "m.archive = $mm_archive"
   echo "m.archive_volume_frequency = $mm_archive_volume_frequency"
 
