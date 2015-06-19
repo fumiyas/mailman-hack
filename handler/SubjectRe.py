@@ -41,19 +41,21 @@ ORIGINAL_SUBJECT = 'X-Original-Subject'
 
 
 def process(mlist, msg, msgdata):
-    ## Same process is done by CookHeaders.py if subject_prefix is enabled
+    # Same process is done by CookHeaders.py if subject_prefix is enabled
     prefix = mlist.subject_prefix.strip()
     if prefix:
         return
+
     # VirginRunner sets _fasttrack for internally crafted messages.
-    fasttrack = msgdata.get('_fasttrack')
-    if not msgdata.get('isdigest') and not fasttrack:
-        try:
-            fix_subject_re(mlist, msg, msgdata)
-        except (UnicodeError, ValueError):
-            # Sometimes subject header is not MIME encoded for 8bit
-            # simply abort fixing.
-            pass
+    if msgdata.get('isdigest') or msgdata.get('_fasttrack'):
+        return
+
+    try:
+        fix_subject_re(mlist, msg, msgdata)
+    except (UnicodeError, ValueError):
+        # Sometimes subject header is not MIME encoded for 8bit
+        # simply abort fixing.
+        pass
 
 
 
