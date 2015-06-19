@@ -18,7 +18,7 @@
 
 """Fix "Subject: Re: Re: Re[2]: ..." to "Subject: Re: ...".
 
-e.g., in mm_cfg.py:
+In mm_cfg.py:
 
 GLOBAL_PIPELINE.insert(GLOBAL_PIPELINE.index('CookHeaders'), 'SubjectReReRe')
 

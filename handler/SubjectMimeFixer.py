@@ -16,6 +16,19 @@
 ## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 ## USA.
 
+"""Fix broken MIME-encoded subject header. e.g.:
+
+    Subject: =?ISO-2022-JP?B?GyRCJUYlOSVIGyhC?==?ISO-2022-JP?B?GyRCJUYlOSVIGyhC?=
+
+is fixed to:
+
+    Subject: =?ISO-2022-JP?B?GyRCJUYlOSVIGyhC?=
+     =?ISO-2022-JP?B?GyRCJUYlOSVIGyhC?=
+
+In mm_cfg.py:
+
+GLOBAL_PIPELINE.insert(GLOBAL_PIPELINE.index('CookHeaders'), 'SubjectMimeFixer')
+"""
 import re
 
 from Mailman.Handlers.CookHeaders import change_header
