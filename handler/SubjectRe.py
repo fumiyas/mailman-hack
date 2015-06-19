@@ -32,46 +32,11 @@ from email.Header import Header, decode_header, make_header
 from email.Errors import HeaderParseError
 
 from Mailman import Utils
+from Mailman.Handlers.CookHeaders import uheader
+from Mailman.Handlers.CookHeaders import change_header
 
 RECOLON = 'Re:'
 ORIGINAL_SUBJECT = 'X-Original-Subject'
-
-# True/False
-try:
-    True, False
-except NameError:
-    True = 1
-    False = 0
-
-
-
-nonascii = re.compile('[^\s!-~]')
-
-def uheader(mlist, s, header_name=None, continuation_ws='\t', maxlinelen=None):
-    # Get the charset to encode the string in. Then search if there is any
-    # non-ascii character is in the string. If there is and the charset is
-    # us-ascii then we use iso-8859-1 instead. If the string is ascii only
-    # we use 'us-ascii' if another charset is specified.
-    charset = Utils.GetCharSet(mlist.preferred_language)
-    if nonascii.search(s):
-        # use list charset but ...
-        if charset == 'us-ascii':
-            charset = 'iso-8859-1'
-    else:
-        # there is no nonascii so ...
-        charset = 'us-ascii'
-    return Header(s, charset, maxlinelen, header_name, continuation_ws)
-
-def change_header(name, value, mlist, msg, msgdata, delete=True, repl=True):
-    if ((msgdata.get('from_is_list') == 2 or
-        (msgdata.get('from_is_list') == 0 and mlist.from_is_list == 2)) and 
-        not msgdata.get('_fasttrack')
-       ) or name.lower() in ('from', 'reply-to'):
-        msgdata.setdefault('add_header', {})[name] = value
-    elif repl or not msg.has_key(name):
-        if delete:
-            del msg[name]
-        msg[name] = value
 
 
 
