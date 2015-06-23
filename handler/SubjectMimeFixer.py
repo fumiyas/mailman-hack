@@ -25,6 +25,11 @@ is fixed to:
     Subject: =?ISO-2022-JP?B?GyRCJUYlOSVIGyhC?=
      =?ISO-2022-JP?B?GyRCJUYlOSVIGyhC?=
 
+I.e., this handler adds missing "linear-white-space".
+See "5. Use of encoded-words in message headers" in RFC 2047,
+"MIME (Multipurpose Internet Mail Extensions) Part Three:
+Message Header Extensions for Non-ASCII Text".
+
 In mm_cfg.py:
 
 GLOBAL_PIPELINE.insert(GLOBAL_PIPELINE.index('CookHeaders'), 'SubjectMimeFixer')
