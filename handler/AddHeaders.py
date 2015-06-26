@@ -14,11 +14,18 @@ GLOBAL_PIPELINE.insert(GLOBAL_PIPELINE.index('CookHeaders')+1, 'AddHeaders')
 ADD_HEADERS = {
   ## For specific list
   'list-name': {
-    'X-ML-Name': '%(list_name)s',
     'Reply-To': '%(from_header)s',
+    ## fml compatibility
+    'X-ML-Name': '%(list_name)s',
+    'X-ML-Count': '%(post_id)d',
   },
   ## For all lists
-  '*': {'X-ML-Name': '%(list_name)s'},
+  '*': {
+    'Reply-To': '%(from_header)s',
+    ## fml compatibility
+    'X-ML-Name': '%(list_name)s',
+    'X-ML-Count': '%(post_id)d',
+  },
 }
 """
 
@@ -52,6 +59,7 @@ def process(mlist, msg, msgdata):
                   'list_domain':	mlist.host_name,
                   'list_desc':		mlist.description,
                   'list_info':		mlist.info,
+                  'post_id':		mlist.post_id,
                   })
 
     lcset = Utils.GetCharSet(mlist.preferred_language)
