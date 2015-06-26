@@ -1,5 +1,6 @@
-## Mailman: Rewrite the From: header field
-## Copyright (c) 2009-2013 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Mailman 2.1: Rewrite the From: header field
+## Copyright (c) 2009-2015 SATOH Fumiyasu @ OSS Technology Corp., Japan
+##               <https://GitHub.com/fumiyas/mailman-hack>
 ##               <http://www.OSSTech.co.jp/>
 ##
 ## License: GNU General Public License version 2
@@ -35,6 +36,7 @@ from Mailman import mm_cfg
 from Mailman import Utils
 from Mailman import Errors
 from Mailman.SafeDict import SafeDict
+from Mailman.Handlers.CookHeaders import change_header
 
 
 def process(mlist, msg, msgdata):
@@ -90,7 +92,6 @@ def process(mlist, msg, msgdata):
     from_address = from_address_fmt % d
 
     if save_original:
-	msg[save_original] = msg['From']
-    del msg['From']
-    msg['From'] = formataddr((from_name, from_address))
+        change_header(save_original, msg['From'], mlist, msg, msgdata, delete=False)
 
+    change_header('From', formataddr((from_name, from_address)), mlist, msg, msgdata)

@@ -1,5 +1,5 @@
-## Mailman: Add header fields to a posting message
-## Copyright (c) 2009-2013 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Mailman 2.1: Add header fields to a posting message
+## Copyright (c) 2009-2015 SATOH Fumiyasu @ OSS Technology Corp., Japan
 ##               <https://GitHub.com/fumiyas/mailman-hack>
 ##               <http://www.OSSTech.co.jp/>
 ##
@@ -30,6 +30,7 @@ from Mailman import mm_cfg
 from Mailman import Utils
 from Mailman import Errors
 from Mailman.SafeDict import SafeDict
+from Mailman.Handlers.CookHeaders import change_header
 
 
 def process(mlist, msg, msgdata):
@@ -76,5 +77,6 @@ def process(mlist, msg, msgdata):
 	d['from_membername'] = d['from_name']
 
     for name, value_fmt in conf.items():
-	msg[name] = value_fmt % d
+        value = value_fmt % d
+        change_header(name, value, mlist, msg, msgdata, delete=False)
 
