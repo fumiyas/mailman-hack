@@ -1,5 +1,7 @@
 ## Mailman 2.1: Fix "Subject: Re: Re: Re[2]: ..." to "Subject: Re: ..."
 ## Copyright (C) 2014-2015 SATOH Fumiyasu @ OSS Technology Corp., Japan
+##               <https://GitHub.com/fumiyas/mailman-hack>
+##               <http://www.OSSTech.co.jp/>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -20,7 +22,9 @@
 
 In mm_cfg.py:
 
-GLOBAL_PIPELINE.insert(GLOBAL_PIPELINE.index('CookHeaders'), 'SubjectReReRe')
+GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
+  'SubjectReReRe',
+]
 
 NOTE: If you use subject_prefix on all lists, this handler is not required.
 """

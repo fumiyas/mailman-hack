@@ -7,9 +7,11 @@
 
 """Add header fields to a posting message.
 
-e.g., in mm_cfg.py:
+In mm_cfg.py:
 
-GLOBAL_PIPELINE.insert(GLOBAL_PIPELINE.index('CookHeaders')+1, 'AddHeaders')
+GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders')+1:0] = [
+  'AddHeaders',
+]
 
 ADD_HEADERS = {
   ## For specific list

@@ -7,9 +7,11 @@
 
 """Set the suitable(?) 'Reply-To' header field.
 
-e.g., in mm_cfg.py:
+In mm_cfg.py:
 
-GLOBAL_PIPELINE.insert(GLOBAL_PIPELINE.index('CookHeaders')+1, 'AdjustReplyTo')
+GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders')+1:0] = [
+  'AdjustReplyTo',
+]
 
 ## By default, this handler affects all lists. Use the following if you
 ## want to apply to the specific list.

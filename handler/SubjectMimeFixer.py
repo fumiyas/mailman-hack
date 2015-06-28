@@ -1,5 +1,7 @@
 ## Mailman 2.1: Fix broken MIME-encoded subject header
 ## Copyright (C) 2015 SATOH Fumiyasu @ OSS Technology Corp., Japan
+##               <https://GitHub.com/fumiyas/mailman-hack>
+##               <http://www.OSSTech.co.jp/>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -16,7 +18,7 @@
 ## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 ## USA.
 
-"""Fix broken MIME-encoded subject header. e.g.:
+"""Fix broken MIME-encoded subject header. E.g.:
 
     Subject: =?ISO-2022-JP?B?GyRCJUYlOSVIGyhC?==?ISO-2022-JP?B?GyRCJUYlOSVIGyhC?=
 
@@ -32,7 +34,9 @@ Message Header Extensions for Non-ASCII Text".
 
 In mm_cfg.py:
 
-GLOBAL_PIPELINE.insert(GLOBAL_PIPELINE.index('CookHeaders'), 'SubjectMimeFixer')
+GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
+  'SubjectMimeFixer',
+]
 """
 import re
 

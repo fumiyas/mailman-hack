@@ -1,15 +1,18 @@
-## Mailman: Override the 'Message-Id' header in a posting message
-## Copyright (c) 2008-2009 SATOH Fumiyasu @ OSS Technology, Inc.
-##               <http://www.osstech.co.jp/>
+## Mailman 2.1: Override the 'Message-Id' header in a posting message
+## Copyright (c) 2008-2015 SATOH Fumiyasu @ OSS Technology Corp., Japan
+##               <https://GitHub.com/fumiyas/mailman-hack>
+##               <http://www.OSSTech.co.jp/>
 ##
 ## License: GNU General Public License version 2
 ## Date: 2009-07-31, since 2008-07-17
 
 """Override the 'Message-Id' header.
 
-e.g., in mm_cfg.py:
+In mm_cfg.py:
 
-GLOBAL_PIPELINE.insert(GLOBAL_PIPELINE.index('CookHeaders'), 'OverrideMessageId')
+GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders')+1:0] = [
+  'OverrideMessageId',
+]
 
 ## By default, this handler affects all lists. Use the following if you
 ## want to apply to the specific list.

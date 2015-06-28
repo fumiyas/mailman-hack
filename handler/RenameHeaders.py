@@ -1,13 +1,19 @@
-## Mailman: Rename header fields in a posting message
-## Copyright (c) 2006-2009 SATOH Fumiyasu @ OSS Technology, Inc.
-##               <http://www.osstech.co.jp/>
+## Mailman 2.1: Rename header fields in a posting message
+## Copyright (c) 2006-2015 SATOH Fumiyasu @ OSS Technology Corp., Japan
+##               <https://GitHub.com/fumiyas/mailman-hack>
+##               <http://www.OSSTech.co.jp/>
 ##
 ## License: GNU General Public License version 2
 ## Date: 2009-07-31, since 2006-06-23
 
 """Rename header fields in a posting message.
 
-GLOBAL_PIPELINE.insert(GLOBAL_PIPELINE.index('CookHeaders'), 'RenameHeaders')
+In mm_cfg.py:
+
+GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
+  'RenameHeaders',
+]
+
 RENAME_HEADERS = {
   'list-name-foo': ['Received'],
   'list-name-bar': ['Organization', 'User-Agent', 'X-Mailer'],

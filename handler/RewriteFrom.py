@@ -9,9 +9,11 @@
 
 """Rewrite the From: header field.
 
-e.g, in mm_cfg.py:
+In mm_cfg.py:
 
-GLOBAL_PIPELINE.insert(GLOBAL_PIPELINE.index('CookHeaders')+1, 'RewriteFrom')
+GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders')+1:0] = [
+  'RewriteFrom',
+]
 
 REWRITE_FROM = {
     ## For specific list
