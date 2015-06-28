@@ -18,7 +18,7 @@
 ## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 ## USA.
 
-"""Fix broken MIME-encoded subject header. E.g.:
+"""Fix broken MIME-encoded subject header. E.g.,
 
     Subject: =?ISO-2022-JP?B?GyRCJUYlOSVIGyhC?==?ISO-2022-JP?B?GyRCJUYlOSVIGyhC?=
 

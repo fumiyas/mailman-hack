@@ -4,7 +4,6 @@
 ##               <http://www.OSSTech.co.jp/>
 ##
 ## License: GNU General Public License version 2
-## Date: 2009-07-31, since 2006-06-23
 
 """Rename header fields in a posting message.
 
@@ -16,7 +15,7 @@ GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
 
 RENAME_HEADERS = {
   'list-name-foo': ['Received'],
-  'list-name-bar': ['Organization', 'User-Agent', 'X-Mailer'],
+  '*': ['Received', 'Disposition-Notification-To'],
 }
 """
 

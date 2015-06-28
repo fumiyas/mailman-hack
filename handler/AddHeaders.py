@@ -9,21 +9,20 @@
 
 In mm_cfg.py:
 
-GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders')+1:0] = [
+GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
   'AddHeaders',
 ]
 
 ADD_HEADERS = {
   ## For specific list
   'list-name': {
-    'Reply-To': '%(from_header)s',
+    'Reply-To': '%(from_header)s, %(list_address)s',
     ## fml compatibility
     'X-ML-Name': '%(list_name)s',
     'X-ML-Count': '%(post_id)d',
   },
   ## For all lists
   '*': {
-    'Reply-To': '%(from_header)s',
     ## fml compatibility
     'X-ML-Name': '%(list_name)s',
     'X-ML-Count': '%(post_id)d',

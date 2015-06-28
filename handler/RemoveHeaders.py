@@ -4,7 +4,6 @@
 ##               <http://www.OSSTech.co.jp/>
 ##
 ## License: GNU General Public License version 2
-## Date: 2009-06-04, since 2006-06-23
 
 """Remove header fields in a posting message.
 

@@ -4,13 +4,12 @@
 ##               <http://www.OSSTech.co.jp/>
 ##
 ## License: GNU General Public License version 2
-## Date: 2009-07-31, since 2008-07-17
 
 """Override the 'Message-Id' header.
 
 In mm_cfg.py:
 
-GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders')+1:0] = [
+GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
   'OverrideMessageId',
 ]
 

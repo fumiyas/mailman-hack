@@ -33,7 +33,6 @@ from Mailman import mm_cfg
 from Mailman.Handlers.CookHeaders import prefix_subject
 from Mailman.Handlers.CookHeaders import change_header
 
-
 DUMMY_PREFIX = "DUMMY "
 
 

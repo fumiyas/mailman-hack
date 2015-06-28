@@ -11,7 +11,7 @@
 
 In mm_cfg.py:
 
-GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders')+1:0] = [
+GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
   'RewriteFrom',
 ]
 
