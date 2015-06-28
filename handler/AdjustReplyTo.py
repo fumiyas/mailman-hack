@@ -1,9 +1,9 @@
-## Mailman: Set the suitable(?) 'Reply-To' header field into a posting message
-## Copyright (c) 2006-2013 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Mailman 2.1: Set the suitable(?) 'Reply-To' header field into a posting message
+## Copyright (c) 2006-2015 SATOH Fumiyasu @ OSS Technology Corp., Japan
+##               <https://GitHub.com/fumiyas/mailman-hack>
 ##               <http://www.OSSTech.co.jp/>
 ##
 ## License: GNU General Public License version 2
-## Date: 2013-04-10, since 2006-12-21
 
 """Set the suitable(?) 'Reply-To' header field.
 
@@ -21,18 +21,12 @@ import re
 
 from Mailman import mm_cfg
 from Mailman import MemberAdaptor
+from Mailman.Handlers.CookHeaders import change_header
 
-ORIG_NAME = 'X-Original-Reply-To'
+COMMASPACE = ',\n '
 
 
 def process(mlist, msg, msgdata):
-    try:
-	confs = mm_cfg.ADJUST_REPLYTO
-	if not mlist.internal_name() in confs:
-	    return
-    except AttributeError:
-	pass
-
     ## Check reply_goes_to_list value:
     ## 0 - Reply-To: not munged
     ## 1 - Reply-To: set back to the list
@@ -45,10 +39,12 @@ def process(mlist, msg, msgdata):
     elif mlist.reply_goes_to_list == 2:
     	return
 
-    ## Rename 'Reply-To' header to 'X-Original-Reply-To' if it exists.
-    for addr in msg.get_all('Reply-To', []):
-	msg[ORIG_NAME] = addr
-    del msg['Reply-To']
+    try:
+	confs = mm_cfg.ADJUST_REPLYTO
+	if not mlist.internal_name() in confs:
+	    return
+    except AttributeError:
+	pass
 
     def domatch(addrpatterns, addr):
 	for addrpattern in addrpatterns:
@@ -71,7 +67,8 @@ def process(mlist, msg, msgdata):
     listaddrs += [alias.strip() for alias in mlist.acceptable_aliases.splitlines()]
     listaddr_set = False
     addrs_set = set()
-    for hfname in ('From', 'To', 'Cc', ORIG_NAME):
+    reply_to = []
+    for hfname in ('From', 'To', 'Cc', 'Reply-To'):
 	for name, addr in email.Utils.getaddresses(msg.get_all(hfname, [])):
 	    if addr in addrs_set:
 		continue
@@ -85,9 +82,12 @@ def process(mlist, msg, msgdata):
 		    ## List address has already been set
 		    continue
 		listaddr_set = True
-	    msg['Reply-To'] = addr
+            reply_to.append(addr)
 	    addrs_set.add(addr)
+
     if not listaddr_set:
-	## List address has NOT been set
-	msg['Reply-To'] = mlist.reply_to_address or mlist.GetListEmail()
+	## Prepend the list address if it has NOT been set
+        reply_to[0:0] = [mlist.reply_to_address or mlist.GetListEmail()]
+
+    change_header('Reply-To', COMMASPACE.join(reply_to), mlist, msg, msgdata)
 
