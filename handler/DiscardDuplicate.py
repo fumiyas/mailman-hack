@@ -22,7 +22,6 @@ import time
 
 from Mailman import mm_cfg
 from Mailman import Errors
-from Mailman.Logging.Syslog import syslog
 
 
 class DuplicateDetected(Errors.DiscardMessage):
