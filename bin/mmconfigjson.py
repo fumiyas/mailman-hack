@@ -78,7 +78,7 @@ def main():
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             usage()
-        elif opt in ('-n', '--set'):
+        elif opt in ('-s', '--set'):
             set_p = True
 
     if len(args) < 1:
