@@ -88,7 +88,8 @@ def main():
             d = pickle.load(f)
  
         if not (len(d['archives']) > num):
-            ## No expirations
+            if verbose_p:
+                print("No expirations", file=sys.stderr)
             return
 
         while len(d['archives']) > num:
