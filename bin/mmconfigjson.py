@@ -17,6 +17,12 @@ Options:
         Read configurations in JSON format from standard input
         and set to the list
 
+Arguments:
+    LISTNAME
+        Listname
+    NAME
+        Configuration name(s) to print its value(s)
+
 Examples:
     $ mmconfigjson managers
     ...

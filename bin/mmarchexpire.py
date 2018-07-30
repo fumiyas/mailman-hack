@@ -1,14 +1,30 @@
 #! /usr/bin/python
 ## -*- coding: utf-8 -*- vim:shiftwidth=4:expandtab:
 ##
-## Mailman 2.1: Get and Set list configurations in JSON format
+## Mailman 2.1: Expire list archives
 ## Copyright (c) 2018 SATOH Fumiyasu @ OSS Technology Corp., Japan
 ##
 ## License: GNU General Public License version 2 or later
 ##
 
-## FIXME
-"""No document. Sorry..."""
+"""Expire list archives
+
+Usage: mmarchexpire [OPTIONS] LISTNAME VOLUMES
+
+Options:
+    --verbose
+    -v
+        Vervose mode
+    --dry-run
+    -n
+        Perform a trial run with no changes made
+
+Arguments:
+    LISTNAME
+        Listname
+    VOLUMES
+        Number of volumes to remain
+"""
 
 from __future__ import print_function
 
