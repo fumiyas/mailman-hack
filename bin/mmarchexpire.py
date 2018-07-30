@@ -88,6 +88,7 @@ def main():
             d = pickle.load(f)
  
         if not (len(d['archives']) > num):
+            ## No expirations
             return
 
         while len(d['archives']) > num:
@@ -115,12 +116,11 @@ def main():
                 except OSError as e:
                     if e.errno <> errno.ENOENT: raise
 
-        index_new = index + '.new'
-        with os.fdopen(os.open(index_new, os.O_WRONLY | os.O_CREAT, 0o660), 'w') as f:
-            pickle.dump(d, f)
-        os.rename(index_new, index)
-
         if not dry_run_p:
+            index_new = index + '.new'
+            with os.fdopen(os.open(index_new, os.O_WRONLY | os.O_CREAT, 0o660), 'w') as f:
+                pickle.dump(d, f)
+            os.rename(index_new, index)
             ## Update index.html
             archiver = HyperArchive(mlist)
             archiver.VERBOSE = verbose_p
