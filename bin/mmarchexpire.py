@@ -79,10 +79,6 @@ def pdie(code, msg=''):
     sys.exit(code)
 
 
-def isprimitive(v):
-    return isinstance(v, (types.NoneType, bool, str, unicode, int, float, list, dict))
-
-
 def main():
     try:
         opts, args = getopt.getopt(
