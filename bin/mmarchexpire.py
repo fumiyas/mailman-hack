@@ -115,6 +115,10 @@ def main():
             pdie(2, C_('No such list "%(listname)s"\n%(e)s'))
 
         index = os.path.join(mlist.archive_dir(), 'pipermail.pck')
+        if not os.path.isfile(index):
+            if verbose_p:
+                print("No archives", file=sys.stderr)
+            return
         with open(index, 'r') as f:
             d = pickle.load(f)
 
