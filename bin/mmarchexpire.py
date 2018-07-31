@@ -162,7 +162,8 @@ def main():
 
         if not dry_run_p:
             index_new = index + '.new'
-            with os.fdopen(os.open(index_new, os.O_WRONLY | os.O_CREAT, 0o660), 'w') as f:
+            with os.fdopen(os.open(index_new, os.O_WRONLY | os.O_CREAT, 0000), 'w') as f:
+                os.fchmod(f.fileno(), 0660)
                 pickle.dump(d, f)
             os.rename(index_new, index)
             ## Update index.html
