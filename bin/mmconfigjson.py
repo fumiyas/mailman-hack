@@ -144,6 +144,8 @@ def main():
         if names:
             attrs = {}
             for name in names:
+                if name in ['bounce_info']: ## is not JSON serializable
+                    continue
                 try:
                     value = getattr(mlist, name)
                 except AttributeError:
