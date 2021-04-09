@@ -2,7 +2,7 @@
 ## -*- coding: utf-8 -*- vim:shiftwidth=4:expandtab:
 ##
 ## Mailman 2.1: Get and Set list configurations in JSON format
-## Copyright (c) 2018 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Copyright (c) 2018-2021 SATOH Fumiyasu @ OSS Technology Corp., Japan
 ##
 ## License: GNU General Public License version 2 or later
 ##
@@ -31,7 +31,7 @@ Examples:
       "host_name": "example.jp",
       "web_page_url": "https://lists.example.jp/mailman/"
     }
-    $ echo '"available_languages": ["en","ja"]}' |mmconfigjson --set staff
+    $ echo '{ "available_languages": ["en","ja"] }' |mmconfigjson --set staff
 """
 
 from __future__ import print_function
