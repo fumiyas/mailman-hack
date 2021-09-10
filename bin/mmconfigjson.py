@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 ## -*- coding: utf-8 -*- vim:shiftwidth=4:expandtab:
 ##
 ## Mailman 2.1: Get and Set list configurations in JSON format
@@ -26,8 +26,11 @@ Arguments:
 Examples:
     $ mmconfigjson managers
     ...
+    $ mmconfigjson <(list_lists --bare)
+    ...
     $ mmconfigjson admins host_name web_page_url invalid_name
     {
+      "name": "admins",
       "host_name": "example.jp",
       "web_page_url": "https://lists.example.jp/mailman/"
     }
@@ -103,6 +106,41 @@ def _byteify(data, ignore_dicts = False):
     return data
 
 
+def configjson(listname, read_attr_names, write_attrs):
+    write_p = write_attrs is not None
+
+    mlist = None
+    try:
+        try:
+            mlist = MailList(listname, lock=write_p)
+        except Errors.MMListError, e:
+            pdie(2, C_('No such list "%(listname)s"\n%(e)s'))
+
+        if not read_attr_names and not write_p:
+            read_attr_names = filter(lambda n: attr_name_re.match(n), dir(mlist))
+
+        if read_attr_names:
+            attrs = { "name": listname }
+            for attr_name in read_attr_names:
+                if attr_name in ['bounce_info']: ## is not JSON serializable
+                    continue
+                try:
+                    value = getattr(mlist, attr_name)
+                except AttributeError:
+                    continue
+                if isprimitive(value):
+                    attrs[attr_name] = value
+            print(json.dumps(attrs, ensure_ascii=False, sort_keys=True, indent=2))
+
+        if write_p:
+            for attr_name, value in write_attrs.items():
+                setattr(mlist, attr_name, value)
+            mlist.Save()
+
+    finally:
+        if mlist and mlist.Locked():
+            mlist.Unlock()
+
 def main():
     try:
         opts, args = getopt.getopt(
@@ -111,57 +149,32 @@ def main():
     except getopt.error, msg:
         pdie(1, msg)
 
-    set_p = False
+    write_p = False
     values = None
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             usage()
         elif opt in ('-s', '--set'):
-            set_p = True
+            write_p = True
 
     if len(args) < 1:
         pdie(1, C_('listname is required'))
 
     listname = args[0].lower().strip()
-    names = args[1:]
+    read_attr_names = args[1:]
 
-    attr_sets = {}
-    if set_p:
-        attr_sets = json_load_byteified(sys.stdin)
-    if not isinstance(attr_sets, dict):
-        pdie(1, "Invalid input")
+    write_attrs = None
+    if write_p:
+        write_attrs = json_load_byteified(sys.stdin)
+        if not isinstance(write_attrs, dict):
+            pdie(1, "Invalid input")
 
-    mlist = None
-    try:
-        try:
-            mlist = MailList(listname, lock=set_p)
-        except Errors.MMListError, e:
-            pdie(2, C_('No such list "%(listname)s"\n%(e)s'))
-
-        if not names and not set_p:
-            names = filter(lambda n: attr_name_re.match(n), dir(mlist))
-
-        if names:
-            attrs = {}
-            for name in names:
-                if name in ['bounce_info']: ## is not JSON serializable
-                    continue
-                try:
-                    value = getattr(mlist, name)
-                except AttributeError:
-                    continue
-                if isprimitive(value):
-                    attrs.update({name: value})
-            print(json.dumps(attrs, ensure_ascii=False, sort_keys=True, indent=2))
-
-        if set_p:
-            for name, value in attr_sets.items():
-                setattr(mlist, name, value)
-            mlist.Save()
-
-    finally:
-        if mlist and mlist.Locked():
-            mlist.Unlock()
+    if "/" in listname:
+        with open(listname) as f:
+            for line in f:
+                configjson(line.strip(), read_attr_names, write_attrs)
+    else:
+        configjson(listname, read_attr_names, write_attrs)
 
 
 if __name__ == '__main__':
