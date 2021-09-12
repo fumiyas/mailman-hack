@@ -119,6 +119,8 @@ def configjson(listname, read_attr_names, write_attrs):
         if not read_attr_names and not write_p:
             read_attr_names = filter(lambda n: attr_name_re.match(n), dir(mlist))
             read_attr_names.remove('password') ## has admin's SHA-1 password hash
+            read_attr_names.remove('mod_password') ## ditto
+            read_attr_names.remove('post_password') ## ditto
             read_attr_names.remove('passwords') ## has member's plain text password
 
         if read_attr_names:
