@@ -50,10 +50,20 @@ function fml_true_p {
   return 0
 }
 
+function atexit {
+  local rc="$1"
+
+  if [[ -n $tmp_dir ]]; then
+    rm -rf "$tmp_dir"
+    trap - EXIT
+  fi
+
+  exit "$rc"
+}
+unset tmp_dir
 tmp_dir=$(mktemp -d "/tmp/${0##*/}.XXXXXXXX") \
   || pdie "Cannot create temporary directory"
-trap 'rm -rf "$tmp_dir"; trap - EXIT; exit 1' HUP INT
-trap 'rm -rf "$tmp_dir"' EXIT
+trap 'rc=$?; trap - EXIT; atexit $rc' EXIT HUP INT
 
 #log="$tmp_dir/${0##*/}.$(date '+%Y%m%d.%H%M%S').log"
 #exec 2> >(tee "$log" 1>&2)
