@@ -1,12 +1,12 @@
 #!/bin/ksh
 ##
-## Mailman 2: Migrate from fml 4.0
+## Mailman 2: Migrate from FML 4.0
 ## Copyright (c) 2013-2015 SATOH Fumiyas @ OSS Technology Corp., Japan
 ##
 ## License: GNU General Public License version 3
 ##
 ## WARNING:
-##	Cannot migrate the following configuration in a fml config.ph:
+##	Cannot migrate the following configuration in a FML config.ph:
 ##	  * $START_HOOK
 ##	  * &ADD_CONTENT_HANDLER() (FIXME)
 ##	  * and more...
@@ -84,12 +84,12 @@ fi
 
 cd "$fml_list_dir" || exit 1
 if [[ ! -f config.ph ]]; then
-  pdie "fml config.ph file not found"
+  pdie "FML config.ph file not found"
 fi
 
 ## ======================================================================
 
-pinfo "Reading fml config.ph file"
+pinfo "Reading FML config.ph file"
 
 typeset -A fml_cf
 typeset -u cf_name
@@ -255,7 +255,7 @@ pinfo "Migrating list configuration to Mailman"
 
   echo "m.owner = ["
   (
-    ## Migrate owner addresses from the fml aliases file
+    ## Migrate owner addresses from the FML aliases file
     ## FIXME: Support ":include:/path/to/file"-style entries
     ## (1) Remove comments
     ## (2) Normalize separators
