@@ -69,7 +69,6 @@ trap 'rc=$?; trap - EXIT; atexit $rc' EXIT HUP INT
 #exec 2> >(tee "$log" 1>&2)
 
 mm_user="${MAILMAN_USER-mailman}"
-mm_site_email="${MAILMAN_SITE_EMAIL-fml}"
 mm_dir="${MAILMAN_DIR-/opt/osstech/lib/mailman}"
 mm_var_dir="${MAILMAN_VAR_DIR-/opt/osstech/var/lib/mailman}"
 mm_lists_dir="${MAILMAN_LISTS_DIR-$mm_var_dir/lists}"
@@ -124,10 +123,10 @@ done
 
 pinfo "Constructing Mailman list configuration"
 
-mm_admin="fml@${fml_cf[DOMAINNAME]}"
+mm_owner_email="${MAILMAN_OWNER_EMAIL-mailman@${fml_cf[DOMAINNAME]}}"
 mm_postid=$(cat seq 2>/dev/null) && let mm_postid++
 mm_mbox="$mm_archives_dir/private/$ml_name_lower.mbox/$ml_name_lower.mbox"
-mm_admin_pass=$(printf '%04x%04x%04x%04x' $RANDOM $RANDOM $RANDOM $RANDOM)
+mm_owner_password=$(printf '%04x%04x%04x%04x' $RANDOM $RANDOM $RANDOM $RANDOM)
 mm_max_message_size=$((${fml_cf[INCOMING_MAIL_SIZE_LIMIT]:-0} / 1000))
 mm_max_days_to_hold="${fml_cf[MODELATOR_EXPIRE_LIMIT]:-14}"
 ## &DEFINE_FIELD_FORCED('reply-to',$MAIL_LIST);
@@ -240,11 +239,11 @@ run "$mm_dir/bin/newlist" \
   --emailhost="${fml_cf[DOMAINNAME]}" \
   ${mm_url_host+--urlhost="$mm_url_host"} \
   "$ml_name" \
-  "$mm_admin" \
-  "$mm_admin_pass" \
+  "$mm_owner_email" \
+  "$mm_owner_password" \
   || exit 1
 
-echo "$mm_admin_pass" |run tee "$mm_ml_dir/adminpass" >/dev/null \
+echo "$mm_owner_password" |run tee "$mm_ml_dir/ownerpassword" >/dev/null \
   || exit 1
 
 ## ======================================================================
@@ -308,7 +307,7 @@ pinfo "Migrating list configuration to Mailman"
     ;
   ) \
   |sed \
-    -e "s/^fml\$/$mm_site_email/" \
+    -e "s/^fml\$/$mm_owner_email/" \
     -e "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
     -e 's/^/"""/' \
     -e 's/$/""",/' \

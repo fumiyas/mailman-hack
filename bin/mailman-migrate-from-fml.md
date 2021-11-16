@@ -158,7 +158,7 @@ cpio 形式アーカイブの展開例:
 ### そのほか留意事項
 
 * 移行先の Mailman メーリングリストの管理者パスワードは自動生成され
-    `<Mailmanデータディレクトリ>/lists/<リスト名>/adminpass` ファイル
+    `<Mailmanデータディレクトリ>/lists/<リスト名>/ownerpassword` ファイル
     に保存される。参照後は削除して構わない。
 
 Mailman の fml との主な違い
