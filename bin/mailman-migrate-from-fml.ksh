@@ -318,7 +318,13 @@ pinfo "Migrating list configuration to Mailman"
 
   if [[ -f moderators ]]; then
     echo "m.moderator = ["
-    sed -n 's/\([^#].*\)/"""\1""",/p' moderators
+    sed -n 's/\([^#].*\)/\1/p' moderators \
+    |sed \
+      -e "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
+      -e 's/^/"""/' \
+      -e 's/$/""",/' \
+    |sort -uf \
+    ;
     echo ']'
   fi
 
@@ -329,9 +335,19 @@ pinfo "Migrating list configuration to Mailman"
   ## FIXME: Add to members and call mlist.setDeliveryStatus(addr, MemberAdaptor.BYADMIN)
   echo "m.accept_these_nonmembers += ["
   diff -i \
-    <(sed -n 's/^\([^# 	]*\).*$/\1/p;' members |sort -uf) \
-    <(sed -n 's/^\([^# 	]*\).*$/\1/p;' actives |sort -uf) \
-  |sed -n 's/^< \(.*\)$/"\1",/p' \
+    <(
+      sed -n 's/^\([^# 	]*\).*$/\1/p;' members \
+      |sed "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
+      |sort -uf \
+      ;
+    ) \
+    <(
+      sed -n 's/^\([^# 	]*\).*$/\1/p;' actives \
+      |sed "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
+      |sort -uf \
+      ;
+    ) \
+  |sed -n 's/^< \(.*\)$/"""\1""",/p' \
   ;
   echo ']'
 
@@ -355,7 +371,8 @@ pinfo "Migrating list configuration to Mailman"
 
 pinfo "Migrating list members to Mailman"
 
-touch "$tmp_dir/$ml_name.regular-members" "$tmp_dir/$ml_name.digest-members"
+: >"$tmp_dir/$ml_name.regular-members.raw"
+: >"$tmp_dir/$ml_name.digest-members.raw"
 sed -n '/^[^#]/p' actives \
 |while read -r address options; do
   skip=
@@ -375,11 +392,19 @@ sed -n '/^[^#]/p' actives \
     continue
   fi
   if [[ -n $digest ]]; then
-    echo "$address" >>"$tmp_dir/$ml_name.digest-members"
+    echo "$address" >>"$tmp_dir/$ml_name.digest-members.raw"
   else
-    echo "$address" >>"$tmp_dir/$ml_name.regular-members"
+    echo "$address" >>"$tmp_dir/$ml_name.regular-members.raw"
   fi
-done \
+done
+
+for mtype in regular digest; do
+  sed "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
+  <"$tmp_dir/$ml_name.$mtype-members.raw" \
+  |sort -uf \
+  >"$tmp_dir/$ml_name.$mtype-members" \
+  ;
+done
 
 if [[ -s $tmp_dir/$ml_name.regular-members || -s $tmp_dir/$ml_name.digest-members ]]; then
   run "$mm_dir/bin/add_members" \
