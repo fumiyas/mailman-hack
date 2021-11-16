@@ -1,7 +1,7 @@
 #!/bin/ksh
 ##
 ## Mailman 2: Migrate from FML 4.0
-## Copyright (c) 2013-2015 SATOH Fumiyas @ OSS Technology Corp., Japan
+## Copyright (c) 2013-2021 SATOH Fumiyas @ OSS Technology Corp., Japan
 ##
 ## License: GNU General Public License version 3
 ##
@@ -33,7 +33,7 @@ function perr {
 
 function pdie {
   perr "$1"
-  exit ${2-1}
+  exit "${2-1}"
 }
 
 function run {
@@ -50,7 +50,7 @@ function fml_true_p {
   return 0
 }
 
-tmp_dir=$(mktemp -d /tmp/${0##*/}.XXXXXXXX) \
+tmp_dir=$(mktemp -d "/tmp/${0##*/}.XXXXXXXX") \
   || pdie "Cannot create temporary directory"
 trap 'rm -rf "$tmp_dir"; trap - EXIT; exit 1' HUP INT
 trap 'rm -rf "$tmp_dir"' EXIT
@@ -344,10 +344,10 @@ sed -n '/^[^#]/p' actives \
   for option in $options; do
     case "$option" in
     s=skip|s=1)
-      skip=set
+      skip="set"
       ;;
     m=[1-9]*)
-      digest=set
+      digest="set"
       ;;
     esac
   done
@@ -383,7 +383,7 @@ if [[ -d spool ]] && ls -fF spool |grep '^[1-9][0-9]*$' >/dev/null; then
   ls -fF spool \
   |grep '^[1-9][0-9]*$' \
   |sort -n \
-  |while read n; do \
+  |while read -r n; do \
     echo "$from_dummy"
     sed 's/^>*From />&/' "spool/$n"
     echo

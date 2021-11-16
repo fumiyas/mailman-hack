@@ -1,7 +1,7 @@
 fml 4 → Mailman 2.1 移行スクリプト
 ======================================================================
 
-* Copyright (C) 2013-2015 SATOH Fumiyasu @ OSS Technology Corp., Japan
+* Copyright (C) 2013-2021 SATOH Fumiyasu @ OSS Technology Corp., Japan
 * License: GNU General Public License version 3
 * URL: <https://github.com/fumiyas/mailman-hack>
 
