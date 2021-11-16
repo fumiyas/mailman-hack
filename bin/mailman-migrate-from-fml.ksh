@@ -19,7 +19,6 @@
 set -u
 umask 0027
 
-export LC_ALL=C
 unset PYTHONPATH
 
 cmd_arg0="$0"
