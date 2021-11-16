@@ -75,6 +75,9 @@ mm_var_dir="${MAILMAN_VAR_DIR-/opt/osstech/var/lib/mailman}"
 mm_lists_dir="${MAILMAN_LISTS_DIR-$mm_var_dir/lists}"
 mm_archives_dir="${MAILMAN_ARCHIVES_DIR-$mm_var_dir/archives}"
 
+mm_info="${MAILMAN_INFO-}"
+mm_description="${MAILMAN_DESCRIPTION-}"
+
 if [[ $# -lt 2 || $# -gt 3 ]]; then
   echo "Usage: $0 FML_LIST_DIR FML_ALIASES [URL_HOST]"
   exit 1
@@ -250,6 +253,8 @@ pinfo "Migrating list configuration to Mailman"
 
 {
   echo "m.real_name = '''$ml_name'''"
+  echo "m.info = '''$mm_info'''"
+  echo "m.description = '''$mm_description'''"
   echo "m.generic_nonmember_action = $mm_generic_nonmember_action"
   echo "m.discard_these_nonmembers = ['''^(${fml_cf[REJECT_ADDR]})@''']"
   echo "m.forward_auto_discards = $mm_forward_auto_discards"
