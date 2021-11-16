@@ -182,7 +182,7 @@ if [[ -n ${fml_cf[SUBJECT_TAG_TYPE]} ]]; then
     mm_subject_prefix="[${fml_cf[BRACKET]}]"
     ;;
   *)
-    perr "$ml_name: SUBJECT_TAG_TYPE='${fml_cf[PERMIT_POST_FROM]}' invalid"
+    perr "$ml_name: SUBJECT_TAG_TYPE='${fml_cf[SUBJECT_TAG_TYPE]}' invalid"
     ;;
   esac
   mm_subject_prefix="$mm_subject_prefix "
