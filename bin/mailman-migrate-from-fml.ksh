@@ -256,6 +256,10 @@ pinfo "Migrating list configuration to Mailman"
   echo "m.info = '''$mm_info'''"
   echo "m.description = '''$mm_description'''"
   echo "m.generic_nonmember_action = $mm_generic_nonmember_action"
+  ## FML $REJECT_ADDR does NOT send a reject notice to a poster,
+  ## but discards a post and forwards the post to owners.
+  ## thus we migrate $REJECT_ADDR to m.discard_these_nonmembers
+  ## instead of m.reject_these_nonmembers.
   echo "m.discard_these_nonmembers = ['''^(${fml_cf[REJECT_ADDR]})@''']"
   echo "m.forward_auto_discards = $mm_forward_auto_discards"
   echo "m.max_message_size = $mm_max_message_size"
@@ -276,7 +280,7 @@ pinfo "Migrating list configuration to Mailman"
     ## (2) Normalize separators
     ## (3) Unwrap lines
     ## (4) Append @DOMAINNAME if @ does not exist
-    ## (5) Enclode addresses by triple-quotations
+    ## (5) Enclose addresses by triple-quotations
     (
       ## Append a blank line after aliases (This is required for sed unwrap script)
       cat "$fml_aliases"
