@@ -134,6 +134,7 @@ mm_max_days_to_hold="${fml_cf[MODELATOR_EXPIRE_LIMIT]:-14}"
 mm_reply_goes_to_list=1 ## "Reply-To: This list" by default
 mm_forward_auto_discards='True'
 mm_bounce_processing='False'
+mm_default_member_moderation='False'
 
 if [[ ${fml_cf[AUTO_REGISTRATION_TYPE]} != 'confirmation' ]]; then
   pdie "$ml_name: AUTO_REGISTRATION_TYPE='${fml_cf[AUTO_REGISTRATION_TYPE]}' not supported"
@@ -141,24 +142,25 @@ fi
 
 case "${fml_cf[PERMIT_POST_FROM]}" in
 anyone)
-  mm_generic_nonmember_action=0
+  mm_generic_nonmember_action=0 ## Accept
   ;;
 members_only)
   case "${fml_cf[REJECT_POST_HANDLER]}" in
   reject)
-    mm_generic_nonmember_action=2
+    mm_generic_nonmember_action=2 ## Reject
     ;;
   ignore)
-    mm_generic_nonmember_action=3
+    mm_generic_nonmember_action=3 ## Discard
     ;;
   *)
     perr "$ml_name: REJECT_POST_HANDLER='${fml_cf[REJECT_POST_HANDLER]}' not supported"
     ;;
   esac
   ;;
-#moderator)
-# FIXME
-#  ;;
+moderator)
+  mm_generic_nonmember_action=1 ## Hold
+  mm_default_member_moderation='True'
+  ;;
 *)
   perr "$ml_name: PERMIT_POST_FROM='${fml_cf[PERMIT_POST_FROM]}' not supported"
   ;;
@@ -255,6 +257,7 @@ pinfo "Migrating list configuration to Mailman"
   echo "m.info = '''$mm_info'''"
   echo "m.description = '''$mm_description'''"
   echo "m.generic_nonmember_action = $mm_generic_nonmember_action"
+  echo "m.default_member_moderation = $mm_default_member_moderation"
   ## FML $REJECT_ADDR does NOT send a reject notice to a poster,
   ## but discards a post and forwards the post to owners.
   ## thus we migrate $REJECT_ADDR to m.discard_these_nonmembers

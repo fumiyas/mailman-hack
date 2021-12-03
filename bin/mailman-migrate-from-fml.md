@@ -106,12 +106,11 @@ cpio 形式アーカイブの展開例:
 
 * `$PERMIT_POST_FROM`
     * 投稿メールの投稿者アドレス制限。
-    * `anyone` (投稿者制限なし)、`members_only` (会員のみ許可) に対応。
-    * `moderator` (司会者の許可が必要) は未対応。FIXME: 対応したい。
+    * `anyone` (投稿者制限なし)、`members_only` (会員のみ許可)、`moderator` (司会者の許可が必要) のすべてに対応。
 * `$REJECT_POST_HANDLER`
     * `$PERMIT_POST_FROM = "members_only"` 時の会員以外からの投稿メールの扱い。
     * `reject` (拒否した旨を示すメールを投稿者に返信)、`ignore` (無視) に対応。
-    * `auto_subscribe` (投稿者アドレスを自動的に会員登録して投稿メールを配信) は未対応。
+    * そのほか `auto_subscribe` (投稿者アドレスを自動的に会員登録して投稿メールを配信) などは未対応。
 * `$SUBJECT_TAG_TYPE`
     * 配信メールの `Subject:` ヘッダーフィールドに付加する接頭辞。
     * `( )`、`[ ]`、`(:)`、`[:]`、`(,)`、`[,]`、`(ID)`、`[ID]`、`()`、`[]` に対応。
