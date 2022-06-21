@@ -62,10 +62,14 @@ fml メーリングリストディレクトリをアーカイブ (cpio形式) �
   -maxdepth 2 \
   ! -name log \
   ! -name summary \
+  ! -name var \
   -type f \
+  -print0 \
 |cpio  \
+  -0 \
   -o \
-  >fml-list-files.cpio \
+|gzip \
+>fml-list-files.cpio \
 ;
 ```
 
@@ -142,18 +146,22 @@ cpio 形式アーカイブの展開例:
 内容 (Perl スクリプト) を記述できますが、それらは移行対象外です。
 
 以下に fml おいてよくカスタマイズされるパラメーターの代表例を挙げる。
-これらは移行スクリプトは感知しないため、可能であれば個別に対応するか、
+***これらは移行スクリプトは感知しない*** ため、可能であれば個別に対応するか、
 移行を諦める必要があります。
 
-* `$NOT_USE_SPOOL`
+* `$NOT_USE_SPOOL = <真偽値>;`
     * メール形式の保存書庫の作成有無。
     * Mailman はメーリングリストごとの設定ができない。
-* `$START_HOOK`
+* `$START_HOOK = <Perl スクリプト>;`
     * 投稿メールを処理する前に実行する Perl スクリプト。
     * 配信メールの `Reply-To:` ヘッダーフィールドを投稿者アドレスにする設定を
       (`&DEFINE_FIELD_FORCED('Reply-To' , $From_address);`)、
       条件付きにする場合などによく利用される。
     * Mailman は Python でハンドラーモジュールを作成する必要がある。
+* `$USE_DISTRIBUTE_FILTER = 1`
+    * 下記のようなフィルター設定の有効化に利用される。
+        * `&DEFINE_FIELD_PAT_TO_REJECT(<ヘッダーフィルド名>, <正規表現>);`
+        * `$DISTRIBUTE_FILTER_HOOK = <Perl スクリプト>;`
 
 ### そのほか留意事項
 
