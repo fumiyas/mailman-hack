@@ -62,7 +62,7 @@ function fml_true_p {
 }
 
 function atexit {
-  local rc="$1"
+  typeset rc="$1"
 
   if [[ -n $tmp_dir ]]; then
     rm -rf "$tmp_dir"
@@ -73,7 +73,7 @@ function atexit {
 }
 unset tmp_dir
 tmp_dir=$(mktemp -d "/tmp/${0##*/}.XXXXXXXX") \
-  || pdie "Cannot create temporary directory"
+  || pdie "Failed to create temporary directory"
 trap 'rc=$?; trap - EXIT; atexit $rc' EXIT HUP INT
 
 #log="$tmp_dir/${0##*/}.$(date '+%Y%m%d.%H%M%S').log"
@@ -367,7 +367,7 @@ pinfo "Migrating list configuration to Mailman"
   echo 'm.Save()'
 } \
 |tee >(sed 's/^/INFO: Mailman withlist: /' 1>&2) \
-|run "$mm_dir/bin/withlist" --quiet --lock "$ml_name_lower" \
+|run "$mm_dir/bin/withlist" --quiet --lock "$ml_name" \
   || exit 1
 
 ## ======================================================================
