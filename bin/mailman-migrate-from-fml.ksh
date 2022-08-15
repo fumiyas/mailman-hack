@@ -296,7 +296,7 @@ pinfo "Migrating list configuration to Mailman"
     ## (5) Enclose addresses by triple-quotations
     (
       ## Append a blank line after aliases (This is required for sed unwrap script)
-      cat "$fml_aliases"
+      cat "$fml_aliases" || perr "Failed to read FML aliases file: $fml_aliases"
       echo
     ) \
     |sed \
