@@ -45,6 +45,17 @@ function run {
   fi
 }
 
+function pwgen {
+  typeset pw=
+  typeset rc
+
+  pw=$(tr -dc '#+,.:;<=>_A-Za-z0-9' </dev/urandom |tr -d 0DOQ1lI2Z5S6G8B9q | head -c 14)
+  rc="$?"
+  [[ $rc != 0 || -z "$pw" ]] || return 1
+
+  echo "$pw"
+}
+
 function fml_true_p {
   [[ ${1-} = @(|0) ]] && return 1
   return 0
@@ -126,7 +137,7 @@ pinfo "Constructing Mailman list configuration"
 mm_owner_email="${MAILMAN_OWNER_EMAIL-mailman@${fml_cf[DOMAINNAME]}}"
 mm_postid=$(cat seq 2>/dev/null) && let mm_postid++
 mm_mbox="$mm_archives_dir/private/$ml_name_lower.mbox/$ml_name_lower.mbox"
-mm_owner_password=$(printf '%04x%04x%04x%04x' $RANDOM $RANDOM $RANDOM $RANDOM)
+mm_owner_password=$(pwgen) || pdie "Failed to generate a password" $?
 mm_max_message_size=$((${fml_cf[INCOMING_MAIL_SIZE_LIMIT]:-0} / 1000))
 mm_max_days_to_hold="${fml_cf[MODELATOR_EXPIRE_LIMIT]:-14}"
 ## &DEFINE_FIELD_FORCED('reply-to',$MAIL_LIST);
