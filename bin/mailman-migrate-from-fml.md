@@ -16,6 +16,15 @@ fml 4 のメーリングリストを Mailman 2.1 のメーリングリストに�
 
 あとでちゃんと書く、きっと書く。
 
+### Mailman の設定
+
+`mm_cfg.py`:
+
+```python
+DEFAULT_SUBJECT_PREFIX = "[%(real_name)s:%%05d] "
+DEFAULT_MAX_DAYS_TO_HOLD = 14 ## days
+```
+
 ### 実行
 
 ```console
@@ -122,8 +131,12 @@ cpio 形式アーカイブの展開例:
 * `$INCOMING_MAIL_SIZE_LIMIT`
     * 投稿メールのサイズ制限。
 * `$REJECT_ADDR`
-    * 投稿を拒否する投稿者アドレスの正規表現パターン。
+    * 投稿を破棄する投稿者アドレスの正規表現パターン。
     * Perl 固有の正規表現を用いている場合は手動で Python 向けに書き換える必要があります。
+    * パラメーター名は拒否 (`reject`) するかのように読めるが、実際は破棄 (`discard`) する。
+    * FML は破棄するだけでなくリスト管理者に転送する。Mailman でも転送するには、
+      「非会員で自動的に破棄すると決めたメールはリスト司会者へ転送」(`forward_auto_discards`)
+      を「はい」(デフォルト) に設定する必要がある。
 * `$USE_RFC2369`
     * RFC 2369 標準のヘッダー追加の有無。
 * `$AUTO_HTML_GEN`
