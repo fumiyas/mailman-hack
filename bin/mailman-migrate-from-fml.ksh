@@ -276,6 +276,19 @@ run "$mm_dir/bin/newlist" \
 echo "$mm_owner_password" |run tee "$mm_ml_dir/ownerpassword" >/dev/null \
   || exit 1
 
+## ----------------------------------------------------------------------
+
+mm_fml_dir="$mm_ml_dir/fml"
+
+run mkdir -m 0750 "$mm_fml_dir" || exit $?
+run export PYTHONPATH="$mm_fml_dir" || exit $?
+run cp -pn config.ph "$tmp_dir"/* "$mm_fml_dir/" || exit $?
+for fname in members actives; do
+  if [[ -f "$fname" ]]; then
+    run cp -pn "$fname" "$mm_fml_dir/" || exit $?
+  fi
+done
+
 ## ======================================================================
 
 pinfo "Migrating list configuration to Mailman"
@@ -401,8 +414,8 @@ pinfo "Migrating list configuration to Mailman"
 
 pinfo "Migrating list members to Mailman"
 
-: >"$tmp_dir/$ml_name.regular-members.raw"
-: >"$tmp_dir/$ml_name.digest-members.raw"
+: >"$mm_fml_dir/$ml_name.regular-members.raw"
+: >"$mm_fml_dir/$ml_name.digest-members.raw"
 sed -n '/^[^#]/p' actives \
 |while read -r address options; do
   skip=
@@ -422,24 +435,24 @@ sed -n '/^[^#]/p' actives \
     continue
   fi
   if [[ -n $digest ]]; then
-    echo "$address" >>"$tmp_dir/$ml_name.digest-members.raw"
+    echo "$address" >>"$mm_fml_dir/$ml_name.digest-members.raw"
   else
-    echo "$address" >>"$tmp_dir/$ml_name.regular-members.raw"
+    echo "$address" >>"$mm_fml_dir/$ml_name.regular-members.raw"
   fi
 done
 
 for mtype in regular digest; do
   sed "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
-  <"$tmp_dir/$ml_name.$mtype-members.raw" \
+  <"$mm_fml_dir/$ml_name.$mtype-members.raw" \
   |sort -uf \
-  >"$tmp_dir/$ml_name.$mtype-members" \
+  >"$mm_fml_dir/$ml_name.$mtype-members" \
   ;
 done
 
-if [[ -s $tmp_dir/$ml_name.regular-members || -s $tmp_dir/$ml_name.digest-members ]]; then
+if [[ -s $mm_fml_dir/$ml_name.regular-members || -s $mm_fml_dir/$ml_name.digest-members ]]; then
   run "$mm_dir/bin/add_members" \
-    --regular-members-file="$tmp_dir/$ml_name.regular-members" \
-    --digest-members-file="$tmp_dir/$ml_name.digest-members" \
+    --regular-members-file="$mm_fml_dir/$ml_name.regular-members" \
+    --digest-members-file="$mm_fml_dir/$ml_name.digest-members" \
     --welcome-msg=n \
     --admin-notify=n \
     "$ml_name" \
