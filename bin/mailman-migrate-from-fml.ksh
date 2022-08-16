@@ -50,7 +50,7 @@ function pwgen {
   typeset pw=
   typeset rc
 
-  pw=$(tr -dc '#+,.:;<=>_A-Za-z0-9' </dev/urandom |tr -d 0DOQ1lI2Z5S6G8B9q | head -c 14)
+  pw=$(tr -dc '#+,.:;<=>_A-Za-z0-9' </dev/urandom 2>/dev/null |tr -d 0DOQ1lI2Z5S6G8B9q | head -c 14)
   rc="$?"
   [[ $rc != 0 || -z "$pw" ]] && return 1
 
