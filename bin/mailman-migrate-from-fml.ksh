@@ -85,20 +85,47 @@ function fml_size_to_mm_size {
   echo "$mm_size"
 }
 
-function atexit {
-  typeset rc="$1"
+## ----------------------------------------------------------------------
 
-  if [[ -n $tmp_dir ]]; then
-    rm -rf "$tmp_dir"
-    trap - EXIT
+_cmds_at_exit=()
+
+cmds_at_exit() {
+  typeset cmd
+
+  for cmd in "${_cmds_at_exit[@]}"; do
+    "$cmd"
+  done
+}
+
+trap 'cmds_at_exit' EXIT
+for signal in HUP INT TERM; do
+  trap 'cmds_at_exit; trap - EXIT '$signal'; kill -'$signal' -$$; exit' $signal
+done
+
+## ----------------------------------------------------------------------
+
+_temp_files=()
+_cmds_at_exit+=(clean_tempfiles)
+
+create_tempfile() {
+  typeset vname="$1"; shift
+  typeset fname
+
+  if [[ $vname == *[!_0-9A-Za-z]* ]]; then
+    perr "$0: Invalid variable name: $vname"
+    return 1
   fi
 
-  exit "$rc"
+  fname=$(mktemp "$@" "${TMPDIR:-/tmp}/${0##*/}.XXXXXXXX") || return $?
+  _temp_files+=("$fname")
+  eval "$vname=\"\$fname\""
 }
-unset tmp_dir
-tmp_dir=$(mktemp -d "/tmp/${0##*/}.XXXXXXXX") \
-  || pdie "Failed to create temporary directory"
-trap 'rc=$?; trap - EXIT; atexit $rc' EXIT HUP INT
+
+clean_tempfiles() {
+  [[ -n "${_temp_files[0]+set}" ]] && rm -rf "${_temp_files[@]}"
+}
+
+create_tempfile tmp_dir -d || pdie "Failed to create temporary directory: $?"
 
 #log="$tmp_dir/${0##*/}.$(date '+%Y%m%d.%H%M%S').log"
 #exec 2> >(tee "$log" 1>&2)
