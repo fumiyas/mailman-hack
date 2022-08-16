@@ -384,12 +384,14 @@ mm_withlist_config1_py="$mm_fml_dir/$mm_withlist_config1.py"
   echo "m.accept_these_nonmembers += ["
   diff -i \
     <(
+      [[ -s members ]] || exit 0
       sed -n 's/^\([^# 	]*\).*$/\1/p;' members \
       |sed "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
       |sort -uf \
       ;
     ) \
     <(
+      [[ -s actives ]] || exit 0
       sed -n 's/^\([^# 	]*\).*$/\1/p;' actives \
       |sed "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
       |sort -uf \
@@ -423,30 +425,33 @@ pinfo "Migrating list members to Mailman"
 
 : >"$mm_fml_dir/$ml_name.regular-members.raw"
 : >"$mm_fml_dir/$ml_name.digest-members.raw"
-sed -n '/^[^#]/p' actives \
-|while read -r address options; do
-  skip=
-  digest=
-  for option in $options; do
-    case "$option" in
-    s=skip|s=1)
-      skip="set"
-      ;;
-    m=[1-9]*)
-      digest="set"
-      ;;
-    esac
+
+if [[ -s actives ]]; then
+  sed -n '/^[^#]/p' actives \
+  |while read -r address options; do
+    skip=
+    digest=
+    for option in $options; do
+      case "$option" in
+      s=skip|s=1)
+	skip="set"
+	;;
+      m=[1-9]*)
+	digest="set"
+	;;
+      esac
+    done
+    if [[ -n $skip ]]; then
+      ## FIXME: Add a address as a members with --nomail option
+      continue
+    fi
+    if [[ -n $digest ]]; then
+      echo "$address" >>"$mm_fml_dir/$ml_name.digest-members.raw"
+    else
+      echo "$address" >>"$mm_fml_dir/$ml_name.regular-members.raw"
+    fi
   done
-  if [[ -n $skip ]]; then
-    ## FIXME: Add a address as a members with --nomail option
-    continue
-  fi
-  if [[ -n $digest ]]; then
-    echo "$address" >>"$mm_fml_dir/$ml_name.digest-members.raw"
-  else
-    echo "$address" >>"$mm_fml_dir/$ml_name.regular-members.raw"
-  fi
-done
+fi
 
 for mtype in regular digest; do
   sed "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
