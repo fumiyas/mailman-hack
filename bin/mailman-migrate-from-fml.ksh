@@ -47,10 +47,16 @@ function run {
 }
 
 function pwgen {
+  typeset length="${1-12}"; ${1+shift}
   typeset pw=
   typeset rc
 
-  pw=$(tr -dc '#+,.:;<=>_A-Za-z0-9' </dev/urandom 2>/dev/null |tr -d 0DOQ1lI2Z5S6G8B9q | head -c 14)
+  pw=$(
+    tr -dc '#+,.:;<=>_A-Za-z0-9' </dev/urandom 2>/dev/null \
+    |tr -d 0DOQ1lI2Z5S6G8B9q \
+    |head -c "$length" \
+    ;
+  )
   rc="$?"
   [[ $rc != 0 || -z "$pw" ]] && return 1
 
