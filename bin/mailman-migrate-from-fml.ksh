@@ -61,6 +61,23 @@ function fml_true_p {
   return 0
 }
 
+function fml_size_to_mm_size {
+  typeset fml_size="$1"
+  typeset -i mm_size
+
+  case "$fml_size" in
+  *[Mm])
+    ((mm_size = ${fml_size%?} * 1024 * 1024))
+    ;;
+  *[Kk])
+    ((mm_size = ${fml_size%?} * 1024))
+    ;;
+  esac
+  ((mm_size /= 1000))
+
+  echo "$mm_size"
+}
+
 function atexit {
   typeset rc="$1"
 
@@ -138,7 +155,7 @@ mm_owner_email="${MAILMAN_OWNER_EMAIL-mailman@${fml_cf[DOMAINNAME]}}"
 mm_postid=$(cat seq 2>/dev/null) && let mm_postid++
 mm_mbox="$mm_archives_dir/private/$ml_name_lower.mbox/$ml_name_lower.mbox"
 mm_owner_password=$(pwgen) || pdie "Failed to generate a password" $?
-mm_max_message_size=$((${fml_cf[INCOMING_MAIL_SIZE_LIMIT]:-0} / 1000))
+mm_max_message_size=$(fml_size_to_mm_size "${fml_cf[INCOMING_MAIL_SIZE_LIMIT]:-0}")
 mm_max_days_to_hold="${fml_cf[MODELATOR_EXPIRE_LIMIT]:-14}"
 ## &DEFINE_FIELD_FORCED('reply-to',$MAIL_LIST);
 ## &DEFINE_FIELD_FORCED('Reply-To' , $From_address);
