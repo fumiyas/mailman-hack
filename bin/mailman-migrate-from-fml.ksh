@@ -20,6 +20,7 @@ set -u
 umask 0027
 
 unset PYTHONPATH
+export PYTHONDONTWRITEBYTECODE='set'
 
 cmd_arg0="$0"
 
@@ -293,7 +294,11 @@ done
 
 pinfo "Migrating list configuration to Mailman"
 
-{
+mm_withlist_config1="mm_withlist_config_list"
+mm_withlist_config1_py="$mm_fml_dir/$mm_withlist_config1.py"
+
+(
+  echo 'def run(m):'
   echo "m.real_name = '''$ml_name'''"
   echo "m.info = '''$mm_info'''"
   echo "m.description = '''$mm_description'''"
@@ -395,9 +400,11 @@ pinfo "Migrating list configuration to Mailman"
   echo ']'
 
   echo 'm.Save()'
-} \
-|tee >(sed 's/^/INFO: Mailman withlist: /' 1>&2) \
-|run "$mm_dir/bin/withlist" --quiet --lock "$ml_name" \
+) \
+|sed '2,$s/^/    /' \
+>"$mm_withlist_config1_py"
+
+run "$mm_dir/bin/withlist" --run "$mm_withlist_config1.run" --quiet --lock "$mm_ml_name" \
   || exit 1
 
 ## ======================================================================
