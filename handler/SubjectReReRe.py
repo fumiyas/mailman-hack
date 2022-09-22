@@ -23,7 +23,7 @@
 In mm_cfg.py:
 
 GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
-  'SubjectReReRe',
+    'SubjectReReRe',
 ]
 
 NOTE: If you use subject_prefix on all lists, this handler is not required.

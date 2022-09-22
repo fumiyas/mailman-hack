@@ -10,12 +10,12 @@
 In mm_cfg.py:
 
 GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
-  'RenameHeaders',
+    'RenameHeaders',
 ]
 
 RENAME_HEADERS = {
-  'list-name-foo': ['Received'],
-  '*': ['Received', 'Disposition-Notification-To'],
+    'list-name-foo': ['Received'],
+    '*': ['Received', 'Disposition-Notification-To'],
 }
 """
 
@@ -27,32 +27,32 @@ RENAME_HEADERS_SUFFIX = ''
 
 def process(mlist, msg, msgdata):
     try:
-	confs_by_list = mm_cfg.RENAME_HEADERS
+        confs_by_list = mm_cfg.RENAME_HEADERS
     except AttributeError:
-	return
+        return
 
     if mlist.internal_name() in confs_by_list:
-	conf = confs_by_list[mlist.internal_name()]
+        conf = confs_by_list[mlist.internal_name()]
     elif '*' in confs_by_list:
-	conf = confs_by_list['*']
+        conf = confs_by_list['*']
     else:
-	return
+        return
 
     try:
-	prefix = mm_cfg.RENAME_HEADERS_PREFIX
+        prefix = mm_cfg.RENAME_HEADERS_PREFIX
     except AttributeError:
-	prefix = RENAME_HEADERS_PREFIX
+        prefix = RENAME_HEADERS_PREFIX
 
     try:
-	suffix = mm_cfg.RENAME_HEADERS_SUFFIX
+        suffix = mm_cfg.RENAME_HEADERS_SUFFIX
     except AttributeError:
-	suffix = RENAME_HEADERS_SUFFIX
+        suffix = RENAME_HEADERS_SUFFIX
 
     if prefix == '' and suffix == '':
         return
 
     for name in conf:
-	for body in msg.get_all(name, []):
-	    msg[prefix + name + suffix] = body
-	del msg[name]
+        for body in msg.get_all(name, []):
+            msg[prefix + name + suffix] = body
+        del msg[name]
 

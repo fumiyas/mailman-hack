@@ -10,19 +10,19 @@
 In mm_cfg.py:
 
 GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
-  'CopyHeaders',
+    'CopyHeaders',
 ]
 
 COPY_HEADERS = {
-  ## For specific list
-  'list-name': {
-    'Subject': 'X-Original-Subject',
-  },
-  ## For all lists
-  '*': {
-    'Subject': 'X-Original-Subject',
-    'Reply-To': 'X-Original-Reply-To',
-  },
+    ## For specific list
+    'list-name': {
+        'Subject': 'X-Original-Subject',
+    },
+    ## For all lists
+    '*': {
+        'Subject': 'X-Original-Subject',
+        'Reply-To': 'X-Original-Reply-To',
+    },
 }
 """
 
@@ -31,16 +31,16 @@ from Mailman import mm_cfg
 
 def process(mlist, msg, msgdata):
     try:
-	confs_by_list = mm_cfg.COPY_HEADERS
+        confs_by_list = mm_cfg.COPY_HEADERS
     except AttributeError:
-	return
+        return
 
     if mlist.internal_name() in confs_by_list:
-	conf = confs_by_list[mlist.internal_name()]
+        conf = confs_by_list[mlist.internal_name()]
     elif '*' in confs_by_list:
-	conf = confs_by_list['*']
+        conf = confs_by_list['*']
     else:
-	return
+        return
 
     for name_src, name_dst in conf.items():
         for value in msg.get_all(name_src, []):

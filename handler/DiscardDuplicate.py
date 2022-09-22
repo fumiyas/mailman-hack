@@ -10,7 +10,7 @@
 In mm_cfg.py:
 
 GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
-  'DiscardDuplicate',
+    'DiscardDuplicate',
 ]
 
 ## By default, this handler affects all lists. Use the following if you

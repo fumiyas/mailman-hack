@@ -10,7 +10,7 @@
 In mm_cfg.py:
 
 GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
-  'OverrideMessageId',
+    'OverrideMessageId',
 ]
 
 ## By default, this handler affects all lists. Use the following if you
@@ -27,26 +27,26 @@ ORIG_NAME = 'X-Original-Message-Id'
 
 def process(mlist, msg, msgdata):
     try:
-	confs = mm_cfg.OVERRIDE_MESSAGEID
-	if not mlist.internal_name() in confs:
-	    return
+        confs = mm_cfg.OVERRIDE_MESSAGEID
+        if not mlist.internal_name() in confs:
+            return
     except AttributeError:
-	pass
+        pass
 
     msgid = msg.get('Message-Id')
     if not msgid:
-	return
+        return
 
     match = re.match(r"^<?([^@>]+)(?:(@)([^>]+))?>?$", msgid)
     if not match:
-	return
+        return
     msgid_local = match.group(1) or ''
     msgid_at = match.group(2) or ''
     msgid_domain = match.group(3) or ''
     msgid_at_domain = msgid_at + msgid_domain
 
     for msgid in msg.get_all('Message-Id', []):
-	msg[ORIG_NAME] = msgid
+        msg[ORIG_NAME] = msgid
     del msg['Message-Id']
     msg['Message-Id'] = '<%s-%s%s>' % (msgid_local, mlist.internal_name().replace('@', '='), msgid_at_domain)
 
