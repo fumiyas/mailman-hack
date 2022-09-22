@@ -18,14 +18,14 @@ ADD_HEADERS = {
     'list-name': {
         'Reply-To': '%(from_header)s, %(list_address)s',
         ## fml compatibility
-        'X-ML-Name': '%(list_name)s',
-        'X-ML-Count': '%(post_id)d',
+        'X-ML-Name': '%(list_real_name)s',
+        'X-Mail-Count': '%(post_id)05d',
     },
     ## For all lists
     '*': {
         ## fml compatibility
-        'X-ML-Name': '%(list_name)s',
-        'X-ML-Count': '%(post_id)d',
+        'X-ML-Name': '%(list_real_name)s',
+        'X-Mail-Count': '%(post_id)05d',
     },
 }
 """
