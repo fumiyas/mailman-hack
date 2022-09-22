@@ -48,5 +48,5 @@ def process(mlist, msg, msgdata):
     for msgid in msg.get_all('Message-Id', []):
 	msg[ORIG_NAME] = msgid
     del msg['Message-Id']
-    msg['Message-Id'] = '<%s-%s%s>' % (msgid_local, mlist.internal_name(), msgid_at_domain)
+    msg['Message-Id'] = '<%s-%s%s>' % (msgid_local, mlist.internal_name().replace('@', '='), msgid_at_domain)
 
