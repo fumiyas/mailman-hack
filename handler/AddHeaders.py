@@ -54,7 +54,8 @@ def process(mlist, msg, msgdata):
     else:
         return
 
-    d = SafeDict({'list_real_name':   mlist.real_name,
+    d = SafeDict({
+        'list_real_name':   mlist.real_name,
         'list_name':        mlist.internal_name(),
         'list_address':     mlist.GetListEmail(),
         'list_domain':      mlist.host_name,
@@ -88,4 +89,3 @@ def process(mlist, msg, msgdata):
     for name, value_fmt in conf.items():
         value = value_fmt % d
         change_header(name, value, mlist, msg, msgdata, delete=False)
-

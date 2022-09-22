@@ -58,13 +58,14 @@ def process(mlist, msg, msgdata):
     from_address_fmt = conf.get('from_address', '%(from_address)s')
     save_original = conf.get('save_original')
 
-    d = SafeDict({'list_real_name':	mlist.real_name,
-                'list_name':		mlist.internal_name(),
-                'list_address':	mlist.GetListEmail(),
-                'list_domain':	mlist.host_name,
-                'list_desc':		mlist.description,
-                'list_info':		mlist.info,
-                })
+    d = SafeDict({
+        'list_real_name':	mlist.real_name,
+        'list_name':		mlist.internal_name(),
+        'list_address':	mlist.GetListEmail(),
+        'list_domain':	mlist.host_name,
+        'list_desc':		mlist.description,
+        'list_info':		mlist.info,
+    })
 
     lcset = Utils.GetCharSet(mlist.preferred_language)
 

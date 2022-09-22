@@ -37,4 +37,3 @@ def process(mlist, msg, msgdata):
 
     for hfname in conf:
         del msg[hfname]
-

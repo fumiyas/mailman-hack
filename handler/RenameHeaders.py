@@ -55,4 +55,3 @@ def process(mlist, msg, msgdata):
         for body in msg.get_all(name, []):
             msg[prefix + name + suffix] = body
         del msg[name]
-

@@ -49,4 +49,3 @@ def process(mlist, msg, msgdata):
         msg[ORIG_NAME] = msgid
     del msg['Message-Id']
     msg['Message-Id'] = '<%s-%s%s>' % (msgid_local, mlist.internal_name().replace('@', '='), msgid_at_domain)
-

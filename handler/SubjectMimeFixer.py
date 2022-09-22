@@ -56,4 +56,3 @@ def process(mlist, msg, msgdata):
 
     subject = MIME_RE.sub('\\1\n ', str(subject))
     change_header('Subject', subject, mlist, msg, msgdata)
-

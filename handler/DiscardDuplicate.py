@@ -58,5 +58,3 @@ def process(mlist, msg, msgdata):
         raise DuplicateDetected
 
     xrecords[xid] = xtime
-
-## vim:expandtab

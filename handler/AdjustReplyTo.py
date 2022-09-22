@@ -77,7 +77,7 @@ def process(mlist, msg, msgdata):
             if addr == '':
                 continue
             if mlist.isMember(addr) and \
-            mlist.getDeliveryStatus(addr) == MemberAdaptor.ENABLED:
+               mlist.getDeliveryStatus(addr) == MemberAdaptor.ENABLED:
                 continue
             if domatch(listaddrs, addr):
                 if listaddr_set:
@@ -92,4 +92,3 @@ def process(mlist, msg, msgdata):
         reply_to[0:0] = [mlist.reply_to_address or mlist.GetListEmail()]
 
     change_header('Reply-To', COMMASPACE.join(reply_to), mlist, msg, msgdata)
-

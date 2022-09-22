@@ -45,4 +45,3 @@ def process(mlist, msg, msgdata):
     for name_src, name_dst in conf.items():
         for value in msg.get_all(name_src, []):
             msg[name_dst] = value
-
