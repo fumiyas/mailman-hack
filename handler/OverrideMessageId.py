@@ -22,6 +22,7 @@ import re
 
 from Mailman import mm_cfg
 
+RE_BRACKET = re.compile(r'^(<)?')
 ORIG_NAME = 'X-Original-Message-Id'
 
 
@@ -33,19 +34,14 @@ def process(mlist, msg, msgdata):
     except AttributeError:
         pass
 
-    msgid = msg.get('Message-Id')
-    if not msgid:
+    msgid_orig = msg.get('Message-Id')
+    if not msgid_orig:
         return
 
-    match = re.match(r"^<?([^@>]+)(?:(@)([^>]+))?>?$", msgid)
-    if not match:
-        return
-    msgid_local = match.group(1) or ''
-    msgid_at = match.group(2) or ''
-    msgid_domain = match.group(3) or ''
-    msgid_at_domain = msgid_at + msgid_domain
+    msgid_prefix = mlist.internal_name().replace('@', '=') + '%'
+    msgid_new = RE_BRACKET.sub(r'\1' + msgid_prefix, msgid_orig, 1)
 
     for msgid in msg.get_all('Message-Id', []):
         msg[ORIG_NAME] = msgid
     del msg['Message-Id']
-    msg['Message-Id'] = '<%s-%s%s>' % (msgid_local, mlist.internal_name().replace('@', '='), msgid_at_domain)
+    msg['Message-Id'] = msgid_new
