@@ -12,6 +12,7 @@
 import sys
 import os
 
+
 def run(mlist, *args):
     if not mlist.Locked():
         print >>sys.stderr, 'List is not locked'
@@ -30,4 +31,3 @@ def run(mlist, *args):
 
     pid_exited, status = os.waitpid(pid, 0)
     sys.exit(status >> 8)
-
