@@ -15,7 +15,7 @@ GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
 
 ## By default, this handler affects all lists. Use the following if you
 ## want to apply to the specific list.
-#OVERRIDE_MESSAGEID = ['list-name-foo', list-name-bar']
+#OVERRIDE_MESSAGEID = ['list-name-foo', 'list-name-bar']
 """
 
 import re

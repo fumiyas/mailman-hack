@@ -35,7 +35,7 @@ Message Header Extensions for Non-ASCII Text".
 In mm_cfg.py:
 
 GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
-  'SubjectMimeFixer',
+    'SubjectMimeFixer',
 ]
 """
 import re
