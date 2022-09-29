@@ -45,3 +45,10 @@ def process(mlist, msg, msgdata):
         msg[ORIG_NAME] = msgid
     del msg['Message-Id']
     msg['Message-Id'] = msgid_new
+
+    refs_orig = msg.get('References')
+    if refs_orig:
+        del msg['References']
+        msg['References'] = refs_orig + '\n ' + msgid_orig
+    else:
+        msg['References'] = msgid_orig
