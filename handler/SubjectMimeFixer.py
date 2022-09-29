@@ -1,7 +1,7 @@
 ## Mailman 2.1: Fix broken MIME-encoded subject header
-## Copyright (C) 2015 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Copyright (C) 2015-2022 SATOH Fumiyasu @ OSSTech Corp., Japan
 ##               <https://GitHub.com/fumiyas/mailman-hack>
-##               <http://www.OSSTech.co.jp/>
+##               <https://www.OSSTech.co.jp/>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License

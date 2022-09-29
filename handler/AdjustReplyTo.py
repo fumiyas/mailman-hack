@@ -1,7 +1,7 @@
 ## Mailman 2.1: Set the suitable(?) 'Reply-To' header field into a posting message
-## Copyright (c) 2006-2015 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Copyright (c) 2006-2022 SATOH Fumiyasu @ OSSTech Corp., Japan
 ##               <https://GitHub.com/fumiyas/mailman-hack>
-##               <http://www.OSSTech.co.jp/>
+##               <https://www.OSSTech.co.jp/>
 ##
 ## License: GNU General Public License version 2
 

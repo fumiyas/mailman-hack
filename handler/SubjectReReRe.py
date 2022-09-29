@@ -1,7 +1,7 @@
 ## Mailman 2.1: Fix "Subject: Re: Re: Re[2]: ..." to "Subject: Re: ..."
-## Copyright (C) 2014-2015 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Copyright (C) 2014-2022 SATOH Fumiyasu @ OSSTech Corp., Japan
 ##               <https://GitHub.com/fumiyas/mailman-hack>
-##               <http://www.OSSTech.co.jp/>
+##               <https://www.OSSTech.co.jp/>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License

@@ -1,5 +1,5 @@
 ## Mailman 2.1: Discard duplicate messages
-## Copyright (c) 2018 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Copyright (c) 2018-2022 SATOH Fumiyasu @ OSSTech Corp., Japan
 ##               <https://GitHub.com/fumiyas/mailman-hack>
 ##               <https://www.OSSTech.co.jp/>
 ##

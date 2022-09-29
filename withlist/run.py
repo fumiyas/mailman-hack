@@ -1,7 +1,7 @@
 #!/usr/bin/python
 ##
 ## Mailman withlist: Run command with locking list
-## Copyright (c) 2013-2020 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Copyright (c) 2013-2022 SATOH Fumiyasu @ OSSTech Corp., Japan
 ##
 ## License: GNU General Public License version 2 or later
 ##
