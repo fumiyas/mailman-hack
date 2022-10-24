@@ -1,7 +1,7 @@
 FML 4 → Mailman 2.1 移行スクリプト
 ======================================================================
 
-* Copyright (C) 2013-2021 SATOH Fumiyasu @ OSS Technology Corp., Japan
+* Copyright (C) 2013-2022 SATOH Fumiyasu @ OSSTech Corp., Japan
 * License: GNU General Public License version 3
 * URL: <https://github.com/fumiyas/mailman-hack>
 
@@ -69,9 +69,18 @@ FML メーリングリストディレクトリをアーカイブ (cpio形式) �
 # find \
   -mindepth 2 \
   -maxdepth 2 \
+  ! -name 'actives.[0-9]' \
+  ! -name 'actives.[0-9][0-9]' \
+  ! -name 'members.[0-9]' \
+  ! -name 'members.[0-9][0-9]' \
   ! -name log \
   ! -name summary \
   ! -name var \
+  ! -name '*.bak' \
+  ! -name '*.db' \
+  ! -name '*.dir' \
+  ! -name '*.pag' \
+  ! -name '*.old \
   -type f \
   -print0 \
 |cpio  \
@@ -166,6 +175,7 @@ cpio 形式アーカイブの展開例:
 * `$NOT_USE_SPOOL = <真偽値>;`
     * メール形式の保存書庫の作成有無。
     * Mailman はメーリングリストごとの設定ができない。
+      (HTML 形式の保存書庫の作成有無はリストごとに設定可能)
 * `$START_HOOK = <Perl スクリプト>;`
     * 投稿メールを処理する前に実行する Perl スクリプト。
     * 配信メールの `Reply-To:` ヘッダーフィールドを投稿者メールアドレスにする設定を
@@ -190,6 +200,7 @@ Mailman の FML との主な違い
     * FML は Webサーバー提供の任意の認証方式 (通常はユーザー名とパスワード)
       が利用可能。
     * Mailman でも可能だが要手動設定、かつ管理者/司会者パスワード認証は無効化できない。
+    * OSSTech Mailman なら LDAP 認証が可能、かつ管理者/司会者パスワード認証を無効化可能。
 * メーリングリスト管理者とメーリングリスト司会者のほかに、サイト管理者が存在する。
     * サイト管理者パスワードは全メーリングリストの管理者と司会者の権限を持つ。
     * パスワードは `mmsitepass` コマンドで変更可能。
@@ -200,7 +211,10 @@ Mailman の FML との主な違い
     * 非会員は非会員フィルタで扱いが決まる (`accept_these_nonmembers`,
       `hold_these_nonmembers`, `reject_these_nonmembers` `discard_these_nonmembers` 設定)
     * 会員からの投稿には非会員フィルタは適用されない点に注意。
-    * FML はメール投稿可否アドレスリスト (`members` ファイル) とメール配信先アドレスリスト
-      (`actives` ファイル) を別々に管理できる。
+        * FML の投稿を破棄する投稿者メールアドレスの正規表現パターン設定 (`$REJECT_ADDR`) は
+          Mailman の非会員フィルター (`reject_these_nonmembers`) に移行するため、
+          会員には適用されない。
+    * FML はメール投稿可否アドレスリスト (`members` ファイル) と投稿メール配信先アドレスリスト
+      (`actives` ファイル) を別々に管理できるが、Mailman では別々の管理は不可。
 * 配信メールへの `X-ML-Name: リスト名` ヘッダーフィールドの付加は非対応。
 * 配信メールへの `X-ML-Count: 連番` ヘッダーフィールドの付加は非対応。
