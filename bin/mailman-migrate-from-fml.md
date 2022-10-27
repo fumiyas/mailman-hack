@@ -205,11 +205,21 @@ Mailman の FML との主な違い
     * サイト管理者パスワードは全メーリングリストの管理者と司会者の権限を持つ。
     * パスワードは `mmsitepass` コマンドで変更可能。
 * メールによるリモート管理機能はない。
-* Mailman は会員と非会員で別々に投稿の許可・拒否・保留が判定される。
-    * 会員は「制限」フラグがあり、制限なし会員は投稿を許可され、
-      制限付き会員は保留・拒否あるいは破棄される (`member_moderation_action` 設定)。
-    * 非会員は非会員フィルタで扱いが決まる (`accept_these_nonmembers`,
-      `hold_these_nonmembers`, `reject_these_nonmembers` `discard_these_nonmembers` 設定)
+* Mailman は会員と非会員で別々に投稿の許可・拒否・保留・破棄が判定される。
+    * 会員からの投稿の場合 (会員リストに載っているメールアドレスからの投稿):
+        * 制限オプション無効の会員
+          → 投稿可能
+        * 制限オプション有効の会員 (制限会員)
+          → 投稿は保留、拒否、破棄いずれかに設定可能 (`member_moderation_action`)
+    * 会員以外からの投稿の場合 (会員リストに載っていないメールアドレスからの投稿):
+        * 投稿許可リスト (`accept_these_nonmembers`)
+          → 投稿可能
+        * 投稿保留リスト (`hold_these_nonmembers`)
+          → 投稿可能 (司会者が許可した場合)
+        * 投稿拒否リスト (`reject_these_nonmembers`)
+          → 投稿不可能 (投稿者に拒否通知メールを返送)
+        * 投稿破棄リスト (`discard_these_nonmembers`)
+          → 投稿不可能 (なにも返送しない)
     * 会員からの投稿には非会員フィルタは適用されない点に注意。
         * FML の投稿を破棄する投稿者メールアドレスの正規表現パターン設定 (`$REJECT_ADDR`) は
           Mailman の非会員フィルター (`reject_these_nonmembers`) に移行するため、
