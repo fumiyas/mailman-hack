@@ -264,9 +264,9 @@ if [[ -n ${fml_cf[SUBJECT_TAG_TYPE]} ]]; then
   mm_subject_prefix="$mm_subject_prefix "
 fi
 
-mm_include_list_post_header='No'
-if [[ ${fml_cf[USE_RFC2369]-1} = 1 ]]; then
-  mm_include_list_post_header='True'
+mm_include_rfc2369_headers='True'
+if [[ ${fml_cf[USE_RFC2369]-1} != 1 ]]; then
+  mm_include_rfc2369_headers='False'
 fi
 
 mm_archive='True'
@@ -348,7 +348,9 @@ mm_withlist_config1_py="$mm_fml_dir/$mm_withlist_config1.py"
   echo "m.subject_prefix = '''$mm_subject_prefix'''"
   echo "m.subscribe_policy = $mm_subscribe_policy"
   echo "m.reply_goes_to_list = $mm_reply_goes_to_list"
-  echo "m.include_list_post_header = $mm_include_list_post_header"
+  echo "m.include_rfc2369_headers = $mm_include_rfc2369_headers"
+  ## include_list_post_header depends on include_rfc2369_headers
+  echo "m.include_list_post_header = True"
   echo "m.archive = $mm_archive"
   echo "m.archive_volume_frequency = $mm_archive_volume_frequency"
   echo "m.bounce_processing = $mm_bounce_processing"
