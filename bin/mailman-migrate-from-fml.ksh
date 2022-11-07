@@ -237,7 +237,11 @@ fi
 
 mm_subject_prefix=''
 if [[ -n ${fml_cf[SUBJECT_TAG_TYPE]} ]]; then
-  mm_subject_post_id_fmt="%0${fml_cf[SUBJECT_FORM_LONG_ID]-5}d"
+  if [[ ${fml_cf[SUBJECT_FORM_LONG_ID]-} == @(|-1|0) ]]; then
+    mm_subject_post_id_fmt="%d"
+  else
+    mm_subject_post_id_fmt="%0${fml_cf[SUBJECT_FORM_LONG_ID]-5}d"
+  fi
   case "${fml_cf[SUBJECT_TAG_TYPE]}" in
   '( )'|'[ ]')
     mm_subject_prefix="${fml_cf[SUBJECT_TAG_TYPE]/ /${fml_cf[BRACKET]} $mm_subject_post_id_fmt}"
