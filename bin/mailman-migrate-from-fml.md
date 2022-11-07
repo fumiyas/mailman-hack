@@ -133,7 +133,7 @@ cpio 形式アーカイブの展開例:
 * `$REJECT_POST_HANDLER`
     * `$PERMIT_POST_FROM = "members_only"` 時の会員以外からの投稿メールの扱い。
     * `reject` (拒否した旨を示すメールを投稿者に返信)、`ignore` (無視) に対応。
-    * そのほか `auto_subscribe` (投稿者メールアドレスを自動的に会員登録して投稿メールを配信) などは未対応。
+    * `auto_subscribe` (投稿者メールアドレスを自動的に会員登録して投稿メールを配信) は非対応。保留 (`generic_nonmember_action=1`) に移行する。
 * `$SUBJECT_TAG_TYPE`
     * 配信メールの `Subject:` ヘッダーフィールドに付加する接頭辞。
     * `( )`、`[ ]`、`(:)`、`[:]`、`(,)`、`[,]`、`(ID)`、`[ID]`、`()`、`[]` に対応。

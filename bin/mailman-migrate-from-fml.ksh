@@ -28,6 +28,10 @@ function pinfo {
   echo "INFO: $1" 1>&2
 }
 
+function pwarn {
+  echo "$cmd_arg0: WARNING: $1" 1>&2
+}
+
 function perr {
   echo "$cmd_arg0: ERROR: $1" 1>&2
 }
@@ -213,6 +217,10 @@ members_only)
     ;;
   ignore)
     mm_generic_nonmember_action=3 ## Discard
+    ;;
+  auto_subscribe)
+    pwarn "$ml_name: REJECT_POST_HANDLER='${fml_cf[REJECT_POST_HANDLER]}' not supported: Redirect to moderator instead"
+    mm_generic_nonmember_action=1 ## Hold
     ;;
   *)
     perr "$ml_name: REJECT_POST_HANDLER='${fml_cf[REJECT_POST_HANDLER]}' not supported"
