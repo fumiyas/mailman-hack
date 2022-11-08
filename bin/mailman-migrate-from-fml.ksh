@@ -190,7 +190,7 @@ done
 pinfo "Constructing Mailman list configuration"
 
 mm_owner_email="${MAILMAN_OWNER_EMAIL-mailman@${fml_cf[DOMAINNAME]}}"
-mm_postid=$(cat seq 2>/dev/null) && let mm_postid++
+mm_postid=$(cat seq 2>/dev/null) && ((mm_postid++))
 mm_mbox="$mm_archives_dir/private/$ml_name_lower.mbox/$ml_name_lower.mbox"
 mm_owner_password=$(pwgen) || pdie "Failed to generate a password" $?
 mm_max_message_size=$(fml_size_to_mm_size "${fml_cf[INCOMING_MAIL_SIZE_LIMIT]:-0}")
