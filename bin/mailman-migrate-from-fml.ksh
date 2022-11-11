@@ -208,19 +208,23 @@ fi
 
 case "${fml_cf[PERMIT_POST_FROM]}" in
 anyone)
-  mm_generic_nonmember_action=0 ## Accept
+  mm_member_moderation_action=0 ## Hold for moderated members
+  mm_generic_nonmember_action=0 ## Accept for non members
   ;;
 members_only)
   case "${fml_cf[REJECT_POST_HANDLER]}" in
   reject)
-    mm_generic_nonmember_action=2 ## Reject
+    mm_member_moderation_action=1 ## Reject for moderated members
+    mm_generic_nonmember_action=2 ## Reject for non members
     ;;
   ignore)
-    mm_generic_nonmember_action=3 ## Discard
+    mm_member_moderation_action=2 ## Discard for moderated members
+    mm_generic_nonmember_action=3 ## Discard for non members
     ;;
   auto_subscribe)
     pwarn "$ml_name: REJECT_POST_HANDLER='${fml_cf[REJECT_POST_HANDLER]}' not supported: Redirect to moderator instead"
-    mm_generic_nonmember_action=1 ## Hold
+    mm_member_moderation_action=0 ## Hold for moderated members
+    mm_generic_nonmember_action=1 ## Hold for non members
     ;;
   *)
     perr "$ml_name: REJECT_POST_HANDLER='${fml_cf[REJECT_POST_HANDLER]}' not supported"
@@ -228,8 +232,9 @@ members_only)
   esac
   ;;
 moderator)
-  mm_generic_nonmember_action=1 ## Hold
   mm_default_member_moderation='True'
+  mm_member_moderation_action=0 ## Hold for moderated members
+  mm_generic_nonmember_action=1 ## Hold for non members
   ;;
 *)
   perr "$ml_name: PERMIT_POST_FROM='${fml_cf[PERMIT_POST_FROM]}' not supported"
@@ -347,8 +352,9 @@ mm_withlist_config1_py="$mm_fml_dir/$mm_withlist_config1.py"
   echo "m.real_name = '''$ml_name'''"
   echo "m.info = '''$mm_info'''"
   echo "m.description = '''$mm_description'''"
-  echo "m.generic_nonmember_action = $mm_generic_nonmember_action"
   echo "m.default_member_moderation = $mm_default_member_moderation"
+  echo "m.member_moderation_action = $mm_member_moderation_action"
+  echo "m.generic_nonmember_action = $mm_generic_nonmember_action"
   ## FML $REJECT_ADDR does NOT send a reject notice to a poster,
   ## but discards a post and forwards the post to owners.
   ## thus we migrate $REJECT_ADDR to m.discard_these_nonmembers
