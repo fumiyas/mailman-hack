@@ -409,6 +409,7 @@ mm_withlist_config1_py="$mm_fml_dir/$mm_withlist_config1.py"
     ;
   ) \
   |sed \
+    -e '/^:include:/d' \
     -e "s/^fml\$/$mm_owner_email/" \
     -e "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
     -e 's/^/"""/' \

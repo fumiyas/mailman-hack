@@ -56,6 +56,7 @@ DEFAULT_MAX_DAYS_TO_HOLD = 14 ## days
     * `seq` (連番)
     * `members-admin` (管理者メールアドレスリスト)
     * `include-admin` (管理者メールアドレスリスト)
+        * `:include:` を含む可能性があるが、それには非対応。
     * `moderators` (司会者メールアドレスリスト)
     * `actives` (配信先メールアドレスリスト)
     * `members` (投稿許可メールアドレスリスト)
