@@ -3,6 +3,7 @@
 
 import logging
 import sys
+import os
 import re
 
 
@@ -20,7 +21,27 @@ re_include_entry = re.compile(r'^:include:(?P<list_dir>/.*/(?P<list_basedir>[^/]
 
 email_default_domain = sys.argv[1]
 lists_dir = sys.argv[2]
+fml_dir = sys.argv[3]
 aliases_file = lists_dir + '/etc/aliases'
+
+
+def htpasswd2addresses(list_name, fml_dir, email_default_domain):
+    htpasswd_file = f'{fml_dir}/www/authdb/ml-admin/{list_name}/htpasswd'
+    addrs = []
+    try:
+        with open(htpasswd_file) as f:
+            for line in f:
+                line = line.strip()
+                if line == '' or line.startswith('#') or line.find(':') < 1:
+                    continue
+                addr = line[:line.find(':')]
+                if '@' not in addr:
+                    addr += '@' + email_default_domain
+                addrs.append(addr)
+    except Exception as e:
+        logger.warning("Failed to open file: %s: %s", htpasswd_file, e)
+
+    return addrs
 
 
 def entry2addresses(entry, lists_dir, email_default_domain, list_orig_dir):
@@ -31,7 +52,7 @@ def entry2addresses(entry, lists_dir, email_default_domain, list_orig_dir):
         return [entry]
 
     if include_entry_m['list_dir'] != list_orig_dir:
-        logger.warning("Include file for alias not in fml list directory: %s", e)
+        logger.warning("Include file for alias not in fml list directory: Expected %s, actual", list_orig_dir, include_entry_m['list_dir'])
         return []
 
     include_file = '/'.join([lists_dir, include_entry_m['list_basedir'], include_entry_m['include_basename']])
@@ -44,9 +65,10 @@ def entry2addresses(entry, lists_dir, email_default_domain, list_orig_dir):
                     continue
                 addrs.extend(entry2addresses(line, lists_dir, email_default_domain, list_orig_dir))
     except Exception as e:
-        logger.warning("Failed to open include file for alias: %s", e)
+        logger.warning("Failed to open file: %s: %s", include_file, e)
 
     return addrs
+
 
 ## コメント行と空行の削除、継続行のまとめ処理
 lines = []
@@ -76,7 +98,7 @@ for line in lines:
 
 ## エイリアス名からリスト名と管理者アドレスを抽出
 admins_by_name = {}
-for alias in list(entries_by_alias.keys()):
+for alias in sorted(entries_by_alias.keys()):
     entries = entries_by_alias.get(alias)
     if entries is None or len(entries) != 1:
         continue
@@ -87,6 +109,14 @@ for alias in list(entries_by_alias.keys()):
         continue
     if alias != list_entry_m['list_basedir']:
         logger.warning('List name does not match with list directory name: %s: %s', alias, list_entry_m['list_basedir'])
+        continue
+    list_dir = f'{lists_dir}/{alias}'
+    if not os.path.isdir(list_dir):
+        logger.warning('List directory not found: %s', list_dir)
+        continue
+    list_config_file = f'{list_dir}/config.ph'
+    if not os.path.isfile(list_config_file):
+        logger.warning('List configuration file not found: %s', list_config_file)
         continue
 
     alias_admin = alias + '-admin'
@@ -104,14 +134,22 @@ for alias in list(entries_by_alias.keys()):
     list_orig_dir = list_entry_m['list_dir']
     alias_admins = []
     for entry in entries_by_alias.pop(alias_admin):
-        alias_admins.extend(entry2addresses(entry, lists_dir, email_default_domain, list_orig_dir))
+        alias_admins += entry2addresses(entry, lists_dir, email_default_domain, list_orig_dir)
+    alias_admins.sort()
+
+    if fml_dir:
+        alias_admins_ht = htpasswd2addresses(alias, fml_dir, email_default_domain)
+        alias_admins_ht.sort()
+        if set(alias_admins_ht) != set(alias_admins):
+            logger.warning('List admins differ: %s: alias   : %s', alias, alias_admins)
+            logger.warning('List admins differ: %s: htpasswd: %s', alias, alias_admins_ht)
 
     admins_by_name[alias] = alias_admins
 
-for alias in entries_by_alias.keys():
+for alias in sorted(entries_by_alias.keys()):
     logger.warning('Unrecognized alias entry: %s', alias)
 
-for list_name, admins in admins_by_name.items():
+for list_name, admins in sorted(admins_by_name.items()):
     if not admins:
         logger.warning('List has no admin address: %s', list_name)
     print(f'{list_name}\t{lists_dir}/{list_name}\t{" ".join(admins)}')
