@@ -129,8 +129,8 @@ cpio_gz="$1"; shift
     ' sh \
   |cpio  \
     --quiet \
-    -0 \
-    -o \
+    --create \
+    --null \
   ;
 ) \
 |gzip \
