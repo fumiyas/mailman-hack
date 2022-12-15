@@ -131,6 +131,7 @@ cpio_gz="$1"; shift
     --quiet \
     --create \
     --null \
+    --owner 0:0 \
   ;
 ) \
 |gzip \
