@@ -19,9 +19,9 @@ re_entry_sp = re.compile(r'\s,\s')
 re_list_entry = re.compile(r'^:include:(?P<list_dir>/.*/(?P<list_basedir>[^/]+))/include$')
 re_include_entry = re.compile(r'^:include:(?P<list_dir>/.*/(?P<list_basedir>[^/]+))/(?P<include_basename>[^/]+)$')
 
-email_default_domain = sys.argv[1]
-lists_dir = sys.argv[2]
-fml_dir = sys.argv[3]
+lists_dir = sys.argv[1]
+email_default_domain = sys.argv[2]
+fml_dir = sys.argv[3] if len(sys.argv) >= 4 else None
 aliases_file = lists_dir + '/etc/aliases'
 
 
@@ -121,15 +121,14 @@ for alias in sorted(entries_by_alias.keys()):
 
     alias_admin = alias + '-admin'
     if alias_admin not in entries_by_alias:
-        logger.warning('Alias entry not found: %s', alias_admin)
+        logger.warning('Alias entry not found for list: %s: %s', alias, alias_admin)
         continue
 
-    del(entries_by_alias[alias])
-    for alias_x in [alias+'-ctl', alias+'-request', 'owner-'+alias, 'owner-'+alias+'-ctl']:
+    for alias_x in [alias, f'{alias}-ctl', f'{alias}-request', f'owner-{alias}', f'owner-{alias}-ctl']:
         try:
-            del(entries_by_alias[alias_x])
+            entries_by_alias.pop(alias_x)
         except KeyError:
-            logger.warning('Alias entry not found: %s', alias_x)
+            logger.warning('Alias entry not found for list: %s: %s', alias, alias_x)
 
     list_orig_dir = list_entry_m['list_dir']
     alias_admins = []
