@@ -51,7 +51,7 @@ DEFAULT_MAX_DAYS_TO_HOLD = 14 ## days
 
 ### 移行元データ
 
-* `FML メーリングリストディレクトリ/`
+* `/var/spool/ml/<リスト名>` (FML メーリングリストディレクトリ)
     * `config.ph` (設定)
     * `seq` (連番)
     * `members-admin` (管理者メールアドレスリスト)
@@ -62,40 +62,18 @@ DEFAULT_MAX_DAYS_TO_HOLD = 14 ## days
     * `members` (投稿許可メールアドレスリスト)
     * `spool/*` (保存書庫。任意)
 
-参考までに `spool/*` などサイズの大きいファイルを除いて
-FML メーリングリストディレクトリをアーカイブ (cpio形式) する例:
+余計なファイルを概ね取り除いたアーカイブを作成するには
+`fml-listsdir-mkcpio.bash` を利用してみてください。
 
 ```console
-# cd /var/spool/ml
-# find \
-  -mindepth 2 \
-  -maxdepth 2 \
-  ! -name 'actives.[0-9]' \
-  ! -name 'actives.[0-9][0-9]' \
-  ! -name 'members.[0-9]' \
-  ! -name 'members.[0-9][0-9]' \
-  ! -name log \
-  ! -name summary \
-  ! -name var \
-  ! -name '*.bak' \
-  ! -name '*.db' \
-  ! -name '*.dir' \
-  ! -name '*.pag' \
-  ! -name '*.old \
-  -type f \
-  -print0 \
-|cpio  \
-  -0 \
-  -o \
-|gzip \
->fml-list-files.cpio \
-;
+# bash fml-listsdir-mkcpio.bash /var/spool/ml /srv/work/fml-lists.cpio.gz
 ```
 
 cpio 形式アーカイブの展開例:
 
 ```console
-# cpio -idR 0:0 <fml-list-files.cpio
+$ mkdir fml-lists
+$ zcat /srv/work/fml-list-files.cpio.gz |cpio -idm
 ```
 
 ### 環境変数 (デフォルト値)
