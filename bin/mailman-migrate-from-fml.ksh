@@ -177,9 +177,9 @@ fi
 
 fml_list_dir="$1"; shift
 fml_aliases="$1"; shift
-typeset -l mm_ml_name mm_ml_domain
-mm_ml_name="${1-}"; ${1+shift}
-mm_ml_domain="${1-}"; ${1+shift}
+typeset -l mm_list_name mm_list_domain
+mm_list_name="${1-}"; ${1+shift}
+mm_list_domain="${1-}"; ${1+shift}
 
 if [[ $fml_aliases != /* ]]; then
   fml_aliases="$PWD/$fml_aliases"
@@ -216,46 +216,46 @@ done
 pinfo "Constructing FML address lists "
 
 ## FML posters address list
-fml_lists_members="$tmp_dir/members.clean"
-fml_clean_lists members >"$fml_lists_members" || exit $?
+fml_list_members="$tmp_dir/members.cleaned"
+fml_clean_lists members >"$fml_list_members" || exit $?
 
 ## FML distribution address list
-fml_lists_actives="$tmp_dir/actives.clean"
-fml_lists_actives_wo_options="$tmp_dir/actives.clean-wo-options"
-fml_clean_lists actives >"$fml_lists_actives" || exit $?
-sed 's/ .*//' "$fml_lists_actives" >"$fml_lists_actives_wo_options" || exit $?
+fml_list_actives="$tmp_dir/actives.cleaned"
+fml_list_actives_wo_options="$tmp_dir/actives.cleaned-wo-options"
+fml_clean_lists actives >"$fml_list_actives" || exit $?
+sed 's/ .*//' "$fml_list_actives" >"$fml_list_actives_wo_options" || exit $?
 
-fml_lists_diff="$tmp_dir/diff-members-actives"
-diff -i "$fml_lists_members" "$fml_lists_actives_wo_options" >"$fml_lists_diff"
+fml_list_diff="$tmp_dir/diff-members-actives"
+diff -i "$fml_list_members" "$fml_list_actives_wo_options" >"$fml_list_diff"
 
-fml_lists_only_in_members="$tmp_dir/in-members-only"
-sed -n 's/^< //p' "$fml_lists_diff" >"$fml_lists_only_in_members"
+fml_list_only_in_members="$tmp_dir/in-members-only"
+sed -n 's/^< //p' "$fml_list_diff" >"$fml_list_only_in_members"
 
 ## ======================================================================
 
 pinfo "Constructing Mailman list configuration"
 
-if [[ $mm_ml_name == *@* ]]; then
+if [[ $mm_list_name == *@* ]]; then
   ## Mailman vhost
-  mm_ml_domain="${mm_ml_name##*@}"
-  mm_ml_dir="$mm_lists_dir/$mm_ml_domain/${mm_ml_name%@*}"
-  mm_mbox="$mm_archives_dir/private/$mm_ml_domain/$mm_ml_name.mbox/$mm_ml_name.mbox"
+  mm_list_domain="${mm_list_name##*@}"
+  mm_list_dir="$mm_lists_dir/$mm_list_domain/${mm_list_name%@*}"
+  mm_list_mbox="$mm_archives_dir/private/$mm_list_domain/$mm_list_name.mbox/$mm_list_name.mbox"
 else
-  if [[ -z $mm_ml_name ]]; then
-    mm_ml_name="${fml_cf[MAIL_LIST]%@*}"
+  if [[ -z $mm_list_name ]]; then
+    mm_list_name="${fml_cf[MAIL_LIST]%@*}"
   fi
-  if [[ -z $mm_ml_domain ]]; then
-    mm_ml_domain="${fml_cf[MAIL_LIST]##*@}"
+  if [[ -z $mm_list_domain ]]; then
+    mm_list_domain="${fml_cf[MAIL_LIST]##*@}"
   fi
-  mm_ml_dir="$mm_lists_dir/$mm_ml_name"
-  mm_mbox="$mm_archives_dir/private/$mm_ml_name.mbox/$mm_ml_name.mbox"
+  mm_list_dir="$mm_lists_dir/$mm_list_name"
+  mm_list_mbox="$mm_archives_dir/private/$mm_list_name.mbox/$mm_list_name.mbox"
 fi
 
-if [[ -d $mm_ml_dir ]]; then
-  pdie "Mailman list $mm_ml_name already exists"
+if [[ -d $mm_list_dir ]]; then
+  pdie "Mailman list $mm_list_name already exists"
 fi
 
-mm_owner_email="${MAILMAN_OWNER_EMAIL-mailman@$mm_ml_domain}"
+mm_owner_email="${MAILMAN_OWNER_EMAIL-mailman@$mm_list_domain}"
 mm_postid=$(cat seq 2>/dev/null) && ((mm_postid++))
 mm_owner_password=$(pwgen) || pdie "Failed to generate a password" $?
 mm_max_message_size=$(fml_size_to_mm_size "${fml_cf[INCOMING_MAIL_SIZE_LIMIT]:-0}")
@@ -268,7 +268,7 @@ mm_bounce_processing='False'
 mm_default_member_moderation='False'
 
 if [[ ${fml_cf[AUTO_REGISTRATION_TYPE]} != 'confirmation' ]]; then
-  pdie "$mm_ml_name: AUTO_REGISTRATION_TYPE='${fml_cf[AUTO_REGISTRATION_TYPE]}' not supported"
+  pdie "$mm_list_name: AUTO_REGISTRATION_TYPE='${fml_cf[AUTO_REGISTRATION_TYPE]}' not supported"
 fi
 
 case "${fml_cf[PERMIT_POST_FROM]}" in
@@ -287,12 +287,12 @@ members_only)
     mm_generic_nonmember_action=3 ## Discard for non members
     ;;
   auto_subscribe)
-    pwarn "$mm_ml_name: REJECT_POST_HANDLER='${fml_cf[REJECT_POST_HANDLER]}' not supported: Redirect to moderator instead"
+    pwarn "$mm_list_name: REJECT_POST_HANDLER='${fml_cf[REJECT_POST_HANDLER]}' not supported: Redirect to moderator instead"
     mm_member_moderation_action=0 ## Hold for moderated members
     mm_generic_nonmember_action=1 ## Hold for non members
     ;;
   *)
-    perr "$mm_ml_name: REJECT_POST_HANDLER='${fml_cf[REJECT_POST_HANDLER]}' not supported"
+    perr "$mm_list_name: REJECT_POST_HANDLER='${fml_cf[REJECT_POST_HANDLER]}' not supported"
     ;;
   esac
   ;;
@@ -302,7 +302,7 @@ moderator)
   mm_generic_nonmember_action=1 ## Hold for non members
   ;;
 *)
-  perr "$mm_ml_name: PERMIT_POST_FROM='${fml_cf[PERMIT_POST_FROM]}' not supported"
+  perr "$mm_list_name: PERMIT_POST_FROM='${fml_cf[PERMIT_POST_FROM]}' not supported"
   ;;
 esac
 
@@ -340,7 +340,7 @@ if [[ -n ${fml_cf[SUBJECT_TAG_TYPE]} ]]; then
     mm_subject_prefix="[${fml_cf[BRACKET]}]"
     ;;
   *)
-    perr "$mm_ml_name: SUBJECT_TAG_TYPE='${fml_cf[SUBJECT_TAG_TYPE]}' invalid"
+    perr "$mm_list_name: SUBJECT_TAG_TYPE='${fml_cf[SUBJECT_TAG_TYPE]}' invalid"
     ;;
   esac
   mm_subject_prefix="$mm_subject_prefix "
@@ -382,18 +382,18 @@ pinfo "Creating Mailman list"
 
 run "$mm_dir/bin/newlist" \
   --quiet \
-  --emailhost="$mm_ml_domain" \
-  "$mm_ml_name" \
+  --emailhost="$mm_list_domain" \
+  "$mm_list_name" \
   "$mm_owner_email" \
   "$mm_owner_password" \
   || exit 1
 
-echo "$mm_owner_password" |run tee "$mm_ml_dir/ownerpassword" >/dev/null \
+echo "$mm_owner_password" |run tee "$mm_list_dir/ownerpassword" >/dev/null \
   || exit 1
 
 ## ----------------------------------------------------------------------
 
-mm_fml_dir="$mm_ml_dir/fml"
+mm_fml_dir="$mm_list_dir/fml"
 
 run mkdir -m 0750 "$mm_fml_dir" || exit $?
 run export PYTHONPATH="$mm_fml_dir" || exit $?
@@ -491,7 +491,7 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
 
   ## FIXME: Add to members and call mlist.setDeliveryStatus(addr, MemberAdaptor.BYADMIN)
   echo "m.accept_these_nonmembers += ["
-  sed -n 's/^.*$/"""&""",/p' "$fml_lists_only_in_members"
+  sed -n 's/^.*$/"""&""",/p' "$fml_list_only_in_members"
   echo ']'
 
   echo 'm.Save()'
@@ -502,7 +502,7 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
 run "$mm_dir/bin/withlist" \
   --run "$(basename "$mm_withlist_config_py" .py).run" \
   --quiet \
-  --lock "$mm_ml_name" \
+  --lock "$mm_list_name" \
   || exit 1
 
 ## ======================================================================
@@ -522,8 +522,8 @@ pinfo "Convert FML actives data to Mailman members data"
 : >"$mm_fml_dir/$fml_localname.regular-members.raw"
 : >"$mm_fml_dir/$fml_localname.digest-members.raw"
 
-if [[ -s $fml_lists_actives ]]; then
-  cat "$fml_lists_actives" \
+if [[ -s $fml_list_actives ]]; then
+  cat "$fml_list_actives" \
   |while read -r address options; do
     skip=
     digest=
@@ -539,7 +539,7 @@ if [[ -s $fml_lists_actives ]]; then
     done
 
     if [[ $address != *@* ]]; then
-      address="$address@$mm_ml_domain"
+      address="$address@$mm_list_domain"
     fi
     if [[ -n $skip ]]; then
       echo "$address" >>"$mm_fml_dir/$fml_localname.nomail-members.raw"
@@ -569,7 +569,7 @@ if [[ -s $mm_fml_dir/$fml_localname.regular-members || -s $mm_fml_dir/$fml_local
     --digest-members-file="$mm_fml_dir/$fml_localname.digest-members" \
     --welcome-msg=n \
     --admin-notify=n \
-    "$mm_ml_name" \
+    "$mm_list_name" \
     || exit 1 \
   ;
 
@@ -588,7 +588,7 @@ if [[ -s $mm_fml_dir/$fml_localname.regular-members || -s $mm_fml_dir/$fml_local
   run "$mm_dir/bin/withlist" \
     --run "$(basename "$mm_withlist_nomail_py" .py).run" \
     --quiet \
-    --lock "$mm_ml_name" \
+    --lock "$mm_list_name" \
     || exit $?
 fi
 
@@ -607,17 +607,17 @@ if [[ -d spool ]] && ls -fF spool |grep '^[1-9][0-9]*$' >/dev/null; then
     sed 's/^>*From />&/' "spool/$n"
     echo
   done \
-  |run tee "$mm_mbox.fml" >/dev/null \
+  |run tee "$mm_list_mbox.fml" >/dev/null \
   ;
 
-  run chown "$mm_user:" "$mm_mbox.fml"
+  run chown "$mm_user:" "$mm_list_mbox.fml"
 
-  if [[ -s $mm_mbox.fml ]]; then
+  if [[ -s $mm_list_mbox.fml ]]; then
     run "$mm_dir/bin/arch" \
       --quiet \
       --wipe \
-      "$mm_ml_name" \
-      "$mm_mbox.fml" \
+      "$mm_list_name" \
+      "$mm_list_mbox.fml" \
       || exit 1 \
     ;
   fi
@@ -625,6 +625,6 @@ fi
 
 ## ======================================================================
 
-#mv "$log" "$mm_ml_dir/"
+#mv "$log" "$mm_list_dir/"
 
 exit 0

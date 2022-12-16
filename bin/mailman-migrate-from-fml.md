@@ -58,8 +58,8 @@ DEFAULT_MAX_DAYS_TO_HOLD = 14 ## days
     * `include-admin` (管理者メールアドレスリスト)
         * `:include:` を含む可能性があるが、それには非対応。
     * `moderators` (司会者メールアドレスリスト)
-    * `actives` (配信先メールアドレスリスト)
     * `members` (投稿許可メールアドレスリスト)
+    * `actives` (配信先メールアドレスリスト)
     * `spool/*` (保存書庫。任意)
 
 余計なファイルを概ね取り除いたアーカイブを作成するには
