@@ -108,9 +108,9 @@ $ zcat /srv/work/fml-list-files.cpio.gz |cpio -idm
 
 * `$PERMIT_POST_FROM`
     * 投稿メールの投稿者メールアドレス制限。
-    * `anyone` (投稿者制限なし)、`members_only` (会員のみ許可)、`moderator` (司会者の許可が必要) のすべてに対応。
+    * `anyone` (投稿者制限なし)、`members_only` (会員のみ許可)、`moderator` (司会者の承認が必要) のすべてに対応。
 * `$REJECT_POST_HANDLER`
-    * `$PERMIT_POST_FROM = "members_only"` 時の会員以外からの投稿メールの扱い。
+    * `$PERMIT_POST_FROM = "members_only"` 時の非会員からの投稿メールの扱い。
     * `reject` (拒否した旨を示すメールを投稿者に返信)、`ignore` (無視) に対応。
     * `auto_subscribe` (投稿者メールアドレスを自動的に会員登録して投稿メールを配信) は非対応。保留 (`generic_nonmember_action=1`) に移行する。
 * `$SUBJECT_TAG_TYPE`
@@ -118,7 +118,8 @@ $ zcat /srv/work/fml-list-files.cpio.gz |cpio -idm
     * `( )`、`[ ]`、`(:)`、`[:]`、`(,)`、`[,]`、`(ID)`、`[ID]`、`()`、`[]` に対応。
     * 上記以外は未対応 (通常は上記以外の設定値は使用されません)。
 * `$INCOMING_MAIL_SIZE_LIMIT`
-    * 投稿メールのサイズ制限。
+    * 投稿メールのサイズ制限。接尾辞 `k`, `K` は kiB 単位、`m`, `M` は MiB 単位を示す。
+    * Mailman は kB 単位、ヘッダー部を除外したサイズ制限となる。
 * `$REJECT_ADDR`
     * 投稿を破棄する投稿者メールアドレスの正規表現パターン。
     * Perl 固有の正規表現を用いている場合は手動で Python 向けに書き換える必要があります。
@@ -191,7 +192,7 @@ Mailman の FML との主な違い
           → 投稿可能
         * 制限オプション有効の会員 (制限会員)
           → 投稿は保留、拒否、破棄いずれかに設定可能 (`member_moderation_action`)
-    * 会員以外からの投稿の場合 (会員リストに載っていないメールアドレスからの投稿):
+    * 非会員からの投稿の場合 (会員リストに載っていないメールアドレスからの投稿):
         * 投稿許可リスト (`accept_these_nonmembers`)
           → 投稿可能
         * 投稿保留リスト (`hold_these_nonmembers`)
