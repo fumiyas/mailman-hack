@@ -53,7 +53,6 @@ function run {
 function pwgen {
   typeset length="${1-12}"; ${1+shift}
   typeset pw=
-  typeset rc
 
   pw=$(
     tr -dc '#+,.:;<=>_A-Za-z0-9' </dev/urandom 2>/dev/null \
@@ -105,7 +104,7 @@ function fml_size_to_mm_size {
     pdie "pwgen: Invalid \$INCOMING_MAIL_SIZE_LIMIT value in config.ph: $fml_size_raw"
     ;;
   *)
-    fml_size = "$fml_size_raw"
+    fml_size="$fml_size_raw"
     ;;
   esac
   ((mm_size = fml_size / 1000))
