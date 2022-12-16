@@ -80,10 +80,11 @@ function fml_clean_lists {
 
   ## FIXME: Append `@$default_domainname` if address has no domainname part
   #|sed "s/^[^@]*\$/&@$default_domainname/" \
-  sed -n \
+  sed -E -n \
     -e '/^#.FML HEADER$/,/#.endFML HEADER$/d' \
-    -e 's/^[ 	]*//' \
-    -e 's/^[^# 	]\{1,\}$/&/p' \
+    -e 's/^[ \t]+//' \
+    -e 's/[ \t]+/ /g' \
+    -e '/^[^#]/p' \
     "$fname" \
   |sort -uf \
   ;
@@ -143,10 +144,19 @@ create_tempfile() {
 }
 
 clean_tempfiles() {
+  if type clean_tempfiles_pre >/dev/null 2>&1; then
+    clean_tempfiles_pre
+  fi
   [[ -n "${_temp_files[0]+set}" ]] && rm -rf "${_temp_files[@]}"
 }
 
 create_tempfile tmp_dir -d || pdie "Failed to create temporary directory: $?"
+
+clean_tempfiles_pre() {
+  [[ -n $mm_fml_dir ]] || return
+  [[ -d $mm_fml_dir ]] || return
+  mv "$tmp_dir"/* "$mm_fml_dir/" >/dev/null 2>&1
+}
 
 #log="$tmp_dir/${0##*/}.$(date '+%Y%m%d.%H%M%S').log"
 #exec 2> >(tee "$log" 1>&2)
@@ -211,10 +221,12 @@ fml_clean_lists members >"$fml_lists_members" || exit $?
 
 ## FML distribution address list
 fml_lists_actives="$tmp_dir/actives.clean"
+fml_lists_actives_wo_options="$tmp_dir/actives.clean-wo-options"
 fml_clean_lists actives >"$fml_lists_actives" || exit $?
+sed 's/ .*//' "$fml_lists_actives" >"$fml_lists_actives_wo_options" || exit $?
 
 fml_lists_diff="$tmp_dir/diff-members-actives"
-diff -i "$fml_lists_members" "$fml_lists_actives" >"$fml_lists_diff"
+diff -i "$fml_lists_members" "$fml_lists_actives_wo_options" >"$fml_lists_diff"
 
 fml_lists_only_in_members="$tmp_dir/in-members-only"
 sed -n 's/^< //p' "$fml_lists_diff" >"$fml_lists_only_in_members"
@@ -385,8 +397,7 @@ mm_fml_dir="$mm_ml_dir/fml"
 
 run mkdir -m 0750 "$mm_fml_dir" || exit $?
 run export PYTHONPATH="$mm_fml_dir" || exit $?
-run cp -pn config.ph "$tmp_dir"/* "$mm_fml_dir/" || exit $?
-for fname in members actives; do
+for fname in config.ph seq members{,-admin} actives moderators include-admin; do
   if [[ -f "$fname" ]]; then
     run cp -pn "$fname" "$mm_fml_dir/" || exit $?
   fi
@@ -506,13 +517,13 @@ run "$mm_dir/bin/withlist" \
 
 ## ======================================================================
 
-pinfo "Migrating list members to Mailman"
+pinfo "Convert FML actives data to Mailman members data"
 
 : >"$mm_fml_dir/$fml_localname.regular-members.raw"
 : >"$mm_fml_dir/$fml_localname.digest-members.raw"
 
-if [[ -s actives ]]; then
-  sed -n '/^[^#]/p' actives \
+if [[ -s $fml_lists_actives ]]; then
+  cat "$fml_lists_actives" \
   |while read -r address options; do
     skip=
     digest=
@@ -526,10 +537,12 @@ if [[ -s actives ]]; then
 	;;
       esac
     done
+
+    if [[ $address != *@* ]]; then
+      address="$address@$mm_ml_domain"
+    fi
     if [[ -n $skip ]]; then
-      ## FIXME: Add a address as a members with --nomail option
-      perr "$mm_ml_name: actives: $address: Unsupported skip option"
-      continue
+      echo "$address" >>"$mm_fml_dir/$fml_localname.nomail-members.raw"
     fi
     if [[ -n $digest ]]; then
       echo "$address" >>"$mm_fml_dir/$fml_localname.digest-members.raw"
@@ -539,15 +552,18 @@ if [[ -s actives ]]; then
   done
 fi
 
-for mtype in regular digest; do
-  sed "s/^\([^@]*\)\$/\1@$mm_ml_domain/" \
+for mtype in nomail regular digest; do
+  sort -uf \
   <"$mm_fml_dir/$fml_localname.$mtype-members.raw" \
-  |sort -uf \
   >"$mm_fml_dir/$fml_localname.$mtype-members" \
   ;
 done
 
+## ----------------------------------------------------------------------
+
+
 if [[ -s $mm_fml_dir/$fml_localname.regular-members || -s $mm_fml_dir/$fml_localname.digest-members ]]; then
+  pinfo "Add Mailman members"
   run "$mm_dir/bin/add_members" \
     --regular-members-file="$mm_fml_dir/$fml_localname.regular-members" \
     --digest-members-file="$mm_fml_dir/$fml_localname.digest-members" \
@@ -556,6 +572,24 @@ if [[ -s $mm_fml_dir/$fml_localname.regular-members || -s $mm_fml_dir/$fml_local
     "$mm_ml_name" \
     || exit 1 \
   ;
+
+  pinfo "Set nomail options to Mailman members"
+  mm_withlist_nomail_py="$mm_fml_dir/mm_withlist_nomail.py"
+  (
+    echo 'from Mailman import MemberAdaptor'
+    echo 'def run(m):'
+    sed 's/^/m.setDeliveryStatus("""/; s/$/""", MemberAdaptor.UNKNOWN)/' \
+      "$mm_fml_dir/$fml_localname.nomail-members.raw" \
+    ;
+    echo 'm.Save()'
+  ) \
+  |sed '3,$s/^/    /' \
+  >"$mm_withlist_nomail_py"
+  run "$mm_dir/bin/withlist" \
+    --run "$(basename "$mm_withlist_nomail_py" .py).run" \
+    --quiet \
+    --lock "$mm_ml_name" \
+    || exit $?
 fi
 
 ## ======================================================================
