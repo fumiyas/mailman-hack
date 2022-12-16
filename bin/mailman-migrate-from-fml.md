@@ -28,7 +28,7 @@ DEFAULT_MAX_DAYS_TO_HOLD = 14 ## days
 ### 実行
 
 ```console
-# mailman-migrate-from-fml.ksh <リストディレクトリ> <aliases> [<URLホスト>]
+# mailman-migrate-from-fml.bash <リストディレクトリ> <aliases> [<URLホスト>]
 ```
 
 * `<リストディレクトリ>`

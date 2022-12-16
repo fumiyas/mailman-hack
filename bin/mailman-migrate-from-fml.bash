@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 ##
 ## Mailman 2: Migrate from FML 4.0
 ## Copyright (c) 2013-2021 SATOH Fumiyas @ OSS Technology Corp., Japan
@@ -17,6 +17,8 @@
 ##
 
 set -u
+set -o pipefail || exit $?		## bash 3.0+
+shopt -s lastpipe || exit $?		## bash 4.2+
 umask 0027
 
 unset PYTHONPATH
