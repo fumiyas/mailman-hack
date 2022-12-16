@@ -90,18 +90,25 @@ function fml_clean_lists {
 }
 
 function fml_size_to_mm_size {
-  typeset fml_size="$1"
-  typeset -i mm_size
+  typeset fml_size_raw="$1"
+  typeset -i fml_size=0
+  typeset -i mm_size=0
 
   case "$fml_size" in
   *[Mm])
-    ((mm_size = ${fml_size%?} * 1024 * 1024))
+    ((fml_size = ${fml_size_raw%?} * 1024 * 1024))
     ;;
   *[Kk])
-    ((mm_size = ${fml_size%?} * 1024))
+    ((fml_size = ${fml_size_raw%?} * 1024))
+    ;;
+  [!0-9])
+    pdie "pwgen: Invalid \$INCOMING_MAIL_SIZE_LIMIT value in config.ph: $fml_size_raw"
+    ;;
+  *)
+    fml_size = "$fml_size_raw"
     ;;
   esac
-  ((mm_size /= 1000))
+  ((mm_size = fml_size / 1000))
 
   echo "$mm_size"
 }
