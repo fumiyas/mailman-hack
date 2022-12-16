@@ -61,8 +61,7 @@ function pwgen {
     |head -c "$length" \
     ;
   )
-  rc="$?"
-  [[ $rc != 0 || -z "$pw" ]] && return 1
+  [[ -z "$pw" ]] && return 1
 
   echo "$pw"
 }
