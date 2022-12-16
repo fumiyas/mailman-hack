@@ -159,7 +159,7 @@ clean_tempfiles() {
 create_tempfile tmp_dir -d || pdie "Failed to create temporary directory: $?"
 
 clean_tempfiles_pre() {
-  [[ -n $mm_fml_dir ]] || return
+  [[ -n ${mm_fml_dir-} ]] || return
   [[ -d $mm_fml_dir ]] || return
   mv "$tmp_dir"/* "$mm_fml_dir/" >/dev/null 2>&1
 }
