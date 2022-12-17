@@ -473,6 +473,7 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
 
 (
   echo 'def run(m):'
+  exec > >(sed 's/^/    /')
   echo "m.info = '''$mm_info'''"
   echo "m.description = '''$mm_description'''"
   echo "m.default_member_moderation = $mm_default_member_moderation"
@@ -558,7 +559,6 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
 
   echo 'm.Save()'
 ) \
-|sed '2,$s/^/    /' \
 >"$mm_withlist_config_py"
 
 run "$mm_dir/bin/withlist" \
@@ -597,12 +597,12 @@ if [[ -s $mm_members_regular || -s $mm_members_digest ]]; then
   (
     echo 'from Mailman import MemberAdaptor'
     echo 'def run(m):'
+    exec > >(sed 's/^/    /')
     sed 's/^/m.setDeliveryStatus("""/; s/$/""", MemberAdaptor.UNKNOWN)/' \
       "$mm_members_nomail" \
     ;
     echo 'm.Save()'
   ) \
-  |sed '3,$s/^/    /' \
   >"$mm_withlist_nomail_py"
   run "$mm_dir/bin/withlist" \
     --run "$(basename "$mm_withlist_nomail_py" .py).run" \
