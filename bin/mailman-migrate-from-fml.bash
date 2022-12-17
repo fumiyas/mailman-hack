@@ -52,6 +52,7 @@ function run {
   fi
 }
 
+# shellcheck disable=SC2120 # <function> references arguments, but none are ever passed
 function pwgen {
   typeset length="${1-12}"; ${1+shift}
   typeset pw=
@@ -157,6 +158,7 @@ clean_tempfiles() {
   [[ -n "${_temp_files[0]+set}" ]] && rm -rf "${_temp_files[@]}"
 }
 
+tmp_dir=
 create_tempfile tmp_dir -d || pdie "Failed to create temporary directory: $?"
 
 clean_tempfiles_pre() {
@@ -530,6 +532,7 @@ pinfo "Convert FML actives data to Mailman members data"
 : >"$mm_fml_dir/mm_members.digest.raw"
 : >"$mm_fml_dir/mm_members.nomail.raw"
 
+# shellcheck disable=SC2002 # Useless cat
 cat "$fml_list_actives" \
 |while read -r address options; do
   skip=
@@ -600,11 +603,13 @@ fi
 
 ## ======================================================================
 
+# shellcheck disable=SC2010 # Don't use ls | grep
 if [[ -d spool ]] && ls -fF spool |grep '^[1-9][0-9]*$' >/dev/null; then
   pinfo "Migrating list archive to Mailman"
 
   from_dummy="From dummy  $(LC_ALL=C TZ= date +'%a %b %e %H:%M:%S %Y')"
 
+  # shellcheck disable=SC2010 # Don't use ls | grep
   ls -fF spool \
   |grep '^[1-9][0-9]*$' \
   |sort -n \
