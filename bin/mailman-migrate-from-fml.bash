@@ -84,6 +84,7 @@ function fml_clean_lists {
   sed -E -n \
     -e '/^#.FML HEADER$/,/#.endFML HEADER$/d' \
     -e 's/^[ \t]+//' \
+    -e 's/[ \t]+$//' \
     -e 's/[ \t]+/ /g' \
     -e '/^[^#]/p' \
     "$fname" \
@@ -222,7 +223,7 @@ done
 
 ## ======================================================================
 
-pinfo "Constructing FML address lists "
+pinfo "Clean and analize FML address list data"
 
 ## FML posters address list
 fml_list_members="$tmp_dir/members.cleaned"
@@ -237,8 +238,60 @@ sed 's/ .*//' "$fml_list_actives" >"$fml_list_actives_wo_options" || exit $?
 fml_list_diff="$tmp_dir/diff-members-actives"
 diff -i "$fml_list_members" "$fml_list_actives_wo_options" >"$fml_list_diff"
 
-fml_list_only_in_members="$tmp_dir/in-members-only"
-sed -n 's/^< //p' "$fml_list_diff" >"$fml_list_only_in_members"
+## ----------------------------------------------------------------------
+
+pinfo "Construct Mailman members data from FML address list"
+
+mm_members_poster="$tmp_dir/mm_members.poster"
+sed -n 's/^< //p' "$fml_list_diff" >"$mm_members_poster"
+
+mm_members_regular="$tmp_dir/mm_members.regular"
+mm_members_regular_raw="$mm_members_regular.raw"
+mm_members_digest="$tmp_dir/mm_members.digest"
+mm_members_digest_raw="$mm_members_digest.raw"
+mm_members_nomail="$tmp_dir/mm_members.nomail"
+mm_members_nomail_raw="$mm_members_nomail.raw"
+
+mm_members_raws=("$mm_members_regular_raw" "$mm_members_digest_raw" "$mm_members_nomail_raw")
+for mm_members_raw in "${mm_members_raws[@]}"; do
+  : >"$mm_members_raw"
+done
+
+# shellcheck disable=SC2002 # Useless cat
+cat "$fml_list_actives" \
+|while read -r address options; do
+  skip=
+  digest=
+  for option in $options; do
+    case "$option" in
+    s=skip|s=1)
+      skip="set"
+      ;;
+    m=[1-9]*)
+      digest="set"
+      ;;
+    esac
+  done
+
+  if [[ $address != *@* ]]; then
+    address="$address@$mm_list_domain" ## FIXME: Add default email domain instead of mm_list_domain
+  fi
+  if [[ -n $skip ]]; then
+    echo "$address" >>"$mm_members_nomail_raw"
+  fi
+  if [[ -n $digest ]]; then
+    echo "$address" >>"$mm_members_digest_raw"
+  else
+    echo "$address" >>"$mm_members_regular_raw"
+  fi
+done
+
+for mm_members_raw in "${mm_members_raws[@]}"; do
+  sort -uf \
+  <"$mm_members_raw" \
+  >"${mm_members_raw%.raw}" \
+  ;
+done
 
 ## ======================================================================
 
@@ -500,7 +553,7 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
 
   ## FIXME: Add to members and call mlist.setDeliveryStatus(addr, MemberAdaptor.BYADMIN)
   echo "m.accept_these_nonmembers += ["
-  sed -n 's/^.*$/"""&""",/p' "$fml_list_only_in_members"
+  sed -n 's/^.*$/"""&""",/p' "$mm_members_poster"
   echo ']'
 
   echo 'm.Save()'
@@ -526,56 +579,13 @@ run "$mm_dir/bin/withlist" \
 
 ## ======================================================================
 
-pinfo "Convert FML actives data to Mailman members data"
-
-: >"$mm_fml_dir/mm_members.regular.raw"
-: >"$mm_fml_dir/mm_members.digest.raw"
-: >"$mm_fml_dir/mm_members.nomail.raw"
-
-# shellcheck disable=SC2002 # Useless cat
-cat "$fml_list_actives" \
-|while read -r address options; do
-  skip=
-  digest=
-  for option in $options; do
-    case "$option" in
-    s=skip|s=1)
-      skip="set"
-      ;;
-    m=[1-9]*)
-      digest="set"
-      ;;
-    esac
-  done
-
-  if [[ $address != *@* ]]; then
-    address="$address@$mm_list_domain"
-  fi
-  if [[ -n $skip ]]; then
-    echo "$address" >>"$mm_fml_dir/mm_members.nomail.raw"
-  fi
-  if [[ -n $digest ]]; then
-    echo "$address" >>"$mm_fml_dir/mm_members.digest.raw"
-  else
-    echo "$address" >>"$mm_fml_dir/mm_members.regular.raw"
-  fi
-done
-
-for mtype in regular digest nomail; do
-  sort -uf \
-  <"$mm_fml_dir/mm_members.$mtype.raw" \
-  >"$mm_fml_dir/mm_members.$mtype" \
-  ;
-done
-
 ## ----------------------------------------------------------------------
 
-
-if [[ -s $mm_fml_dir/mm_members.regular || -s $mm_fml_dir/mm_members.digest ]]; then
+if [[ -s $mm_members_regular || -s $mm_members_digest ]]; then
   pinfo "Add Mailman members"
   run "$mm_dir/bin/add_members" \
-    --regular-members-file="$mm_fml_dir/mm_members.regular" \
-    --digest-members-file="$mm_fml_dir/mm_members.digest" \
+    --regular-members-file="$mm_members_regular" \
+    --digest-members-file="$mm_members_digest" \
     --welcome-msg=n \
     --admin-notify=n \
     "$mm_list_name" \
@@ -588,7 +598,7 @@ if [[ -s $mm_fml_dir/mm_members.regular || -s $mm_fml_dir/mm_members.digest ]]; 
     echo 'from Mailman import MemberAdaptor'
     echo 'def run(m):'
     sed 's/^/m.setDeliveryStatus("""/; s/$/""", MemberAdaptor.UNKNOWN)/' \
-      "$mm_fml_dir/mm_members.nomail" \
+      "$mm_members_nomail" \
     ;
     echo 'm.Save()'
   ) \
