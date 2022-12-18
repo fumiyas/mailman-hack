@@ -226,17 +226,17 @@ done
 pinfo "Clean and analize FML address list data"
 
 ## FML posters address list
-fml_list_members="$tmp_dir/members.cleaned"
-fml_clean_lists members >"$fml_list_members" || exit $?
+fml_list_posters="$tmp_dir/members.cleaned"
+fml_clean_lists members >"$fml_list_posters" || exit $?
 
 ## FML distribution address list
-fml_list_actives="$tmp_dir/actives.cleaned"
-fml_list_actives_wo_options="$tmp_dir/actives.cleaned-wo-options"
-fml_clean_lists actives >"$fml_list_actives" || exit $?
-sed 's/ .*//' "$fml_list_actives" >"$fml_list_actives_wo_options" || exit $?
+fml_list_readers="$tmp_dir/actives.cleaned"
+fml_list_readers_wo_options="$tmp_dir/actives.cleaned-wo-options"
+fml_clean_lists actives >"$fml_list_readers" || exit $?
+sed 's/ .*//' "$fml_list_readers" >"$fml_list_readers_wo_options" || exit $?
 
 fml_list_diff="$tmp_dir/diff-members-actives"
-diff -i "$fml_list_members" "$fml_list_actives_wo_options" >"$fml_list_diff"
+diff -i "$fml_list_posters" "$fml_list_readers_wo_options" >"$fml_list_diff"
 
 ## ----------------------------------------------------------------------
 
@@ -258,7 +258,7 @@ for mm_members_raw in "${mm_members_raws[@]}"; do
 done
 
 # shellcheck disable=SC2002 # Useless cat
-cat "$fml_list_actives" \
+cat "$fml_list_readers" \
 |while read -r address options; do
   skip=
   digest=
@@ -578,8 +578,6 @@ run "$mm_dir/bin/withlist" \
 #)
 
 ## ======================================================================
-
-## ----------------------------------------------------------------------
 
 if [[ -s $mm_members_regular || -s $mm_members_digest ]]; then
   pinfo "Add Mailman members"
