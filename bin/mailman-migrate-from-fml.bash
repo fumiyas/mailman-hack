@@ -242,8 +242,10 @@ diff -i "$fml_list_posters" "$fml_list_readers_wo_options" >"$fml_list_diff"
 
 pinfo "Construct Mailman members data from FML address list"
 
-mm_members_poster="$tmp_dir/mm_members.poster"
-sed -n 's/^< //p' "$fml_list_diff" >"$mm_members_poster"
+mm_members_postonly="$tmp_dir/mm_members.postonly"
+sed -n 's/^< //p' "$fml_list_diff" >"$mm_members_postonly"
+mm_members_readonly="$tmp_dir/mm_members.readonly"
+sed -n 's/^> //p' "$fml_list_diff" >"$mm_members_readonly"
 
 mm_members_regular="$tmp_dir/mm_members.regular"
 mm_members_regular_raw="$mm_members_regular.raw"
@@ -285,6 +287,8 @@ cat "$fml_list_readers" \
     echo "$address" >>"$mm_members_regular_raw"
   fi
 done
+
+cat "$mm_members_postonly" >>"$mm_members_regular_raw"
 
 for mm_members_raw in "${mm_members_raws[@]}"; do
   sort -uf \
@@ -339,6 +343,9 @@ anyone)
   mm_generic_nonmember_action=0 ## Accept for non members
   ;;
 members_only)
+  if [[ -s $mm_members_readonly ]]; then
+    mm_default_member_moderation='True'
+  fi
   case "${fml_cf[REJECT_POST_HANDLER]}" in
   reject)
     mm_member_moderation_action=1 ## Reject for moderated members
@@ -552,11 +559,6 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
     echo "m.post_id = $mm_postid"
   fi
 
-  ## FIXME: Add to members and call mlist.setDeliveryStatus(addr, MemberAdaptor.BYADMIN)
-  echo "m.accept_these_nonmembers += ["
-  sed -n 's/^.*$/"""&""",/p' "$mm_members_poster"
-  echo ']'
-
   echo 'm.Save()'
 ) \
 >"$mm_withlist_config_py"
@@ -590,20 +592,29 @@ if [[ -s $mm_members_regular || -s $mm_members_digest ]]; then
     || exit 1 \
   ;
 
-  pinfo "Set nomail options to Mailman members"
-  mm_withlist_nomail_py="$mm_fml_dir/mm_withlist_nomail.py"
+  pinfo "Set Mailman member options"
+  mm_withlist_member_options_py="$mm_fml_dir/mm_withlist_member_options.py"
   (
+    echo 'from Mailman import mm_cfg'
     echo 'from Mailman import MemberAdaptor'
     echo 'def run(m):'
     exec > >(sed 's/^/    /')
     sed 's/^/m.setDeliveryStatus("""/; s/$/""", MemberAdaptor.UNKNOWN)/' \
       "$mm_members_nomail" \
     ;
+    sed 's/^/m.setDeliveryStatus("""/; s/$/""", MemberAdaptor.BYADMIN)/' \
+      "$mm_members_postonly" \
+    ;
+    if [[ $mm_default_member_moderation == 'True' ]]; then
+      sed 's/^/m.setMemberOption("""/; s/$/""", mm_cfg.Moderate, 0)/' \
+        "$fml_list_posters" \
+      ;
+    fi
     echo 'm.Save()'
   ) \
-  >"$mm_withlist_nomail_py"
+  >"$mm_withlist_member_options_py"
   run "$mm_dir/bin/withlist" \
-    --run "$(basename "$mm_withlist_nomail_py" .py).run" \
+    --run "$(basename "$mm_withlist_member_options_py" .py).run" \
     --quiet \
     --lock "$mm_list_name" \
     || exit $?
