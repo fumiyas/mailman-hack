@@ -191,7 +191,7 @@ if [[ $fml_aliases != /* ]]; then
 fi
 fml_localname="${fml_list_dir##*/}"
 
-cd "$fml_list_dir" || exit 1
+cd "$fml_list_dir" || exit $?
 if [[ ! -f config.ph ]]; then
   pdie "FML config.ph file not found"
 fi
@@ -456,10 +456,10 @@ run "$mm_dir/bin/newlist" \
   "$mm_list_name" \
   "$mm_owner_email" \
   "$mm_owner_password" \
-  || exit 1
+  || exit $?
 
 echo "$mm_owner_password" |run tee "$mm_list_dir/ownerpassword" >/dev/null \
-  || exit 1
+  || exit $?
 
 ## ----------------------------------------------------------------------
 
@@ -563,13 +563,14 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
 
   echo 'm.Save()'
 ) \
->"$mm_withlist_config_py"
+>"$mm_withlist_config_py" \
+|| exit $?
 
 run "$mm_dir/bin/withlist" \
   --run "$(basename "$mm_withlist_config_py" .py).run" \
   --quiet \
   --lock "$mm_list_name" \
-  || exit 1
+  || exit $?
 
 ## ======================================================================
 
@@ -591,7 +592,7 @@ if [[ -s $mm_members_regular || -s $mm_members_digest ]]; then
     --welcome-msg=n \
     --admin-notify=n \
     "$mm_list_name" \
-    || exit 1 \
+    || exit $? \
   ;
 
   pinfo "Set Mailman member options"
@@ -614,7 +615,8 @@ if [[ -s $mm_members_regular || -s $mm_members_digest ]]; then
     fi
     echo 'm.Save()'
   ) \
-  >"$mm_withlist_member_options_py"
+  >"$mm_withlist_member_options_py" \
+  || exit $?
   run "$mm_dir/bin/withlist" \
     --run "$(basename "$mm_withlist_member_options_py" .py).run" \
     --quiet \
@@ -650,7 +652,7 @@ if [[ -d spool ]] && ls -fF spool |grep '^[1-9][0-9]*$' >/dev/null; then
       --wipe \
       "$mm_list_name" \
       "$mm_list_mbox.fml" \
-      || exit 1 \
+      || exit $? \
     ;
   fi
 fi
