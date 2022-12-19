@@ -229,6 +229,12 @@ pinfo "Clean and analize FML address list data"
 fml_list_posters="$tmp_dir/members.cleaned"
 fml_clean_lists members >"$fml_list_posters" || exit $?
 
+## FML moderators address list
+fml_list_moderators="$tmp_dir/moderators.cleaned"
+if [[ -s moderators ]]; then
+  fml_clean_lists moderators >"$fml_list_moderators" || exit $?
+fi
+
 ## FML distribution address list
 fml_list_readers="$tmp_dir/actives.cleaned"
 fml_list_readers_wo_options="$tmp_dir/actives.cleaned-wo-options"
@@ -549,9 +555,13 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
   ;
   echo ']'
 
-  if [[ -f moderators ]]; then
+  if [[ -s $fml_list_moderators ]]; then
     echo "m.moderator = ["
-    fml_clean_lists moderators
+    sed \
+      -e 's/^/"""/' \
+      -e 's/$/""",/' \
+      "$fml_list_moderators" \
+    ;
     echo ']'
   fi
 
