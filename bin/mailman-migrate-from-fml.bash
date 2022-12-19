@@ -489,6 +489,7 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
   exec > >(sed 's/^/    /')
   echo "m.info = '''$mm_info'''"
   echo "m.description = '''$mm_description'''"
+  echo "m.post_id = $mm_postid"
   echo "m.default_member_moderation = $mm_default_member_moderation"
   echo "m.member_moderation_action = $mm_member_moderation_action"
   echo "m.generic_nonmember_action = $mm_generic_nonmember_action"
@@ -563,10 +564,6 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
       "$fml_list_moderators" \
     ;
     echo ']'
-  fi
-
-  if [[ -n $mm_postid ]]; then
-    echo "m.post_id = $mm_postid"
   fi
 
   echo 'm.Save()'
