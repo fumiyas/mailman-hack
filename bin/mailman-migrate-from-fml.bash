@@ -10,11 +10,6 @@
 ##	  * $START_HOOK
 ##	  * &ADD_CONTENT_HANDLER() (FIXME)
 ##	  * and more...
-##
-## FIXME:
-##	* Set m.default_member_moderation=True and m.member_moderation_action=1
-##	  if members_only and actives!=members
-##
 
 set -u
 set -o pipefail || exit $?		## bash 3.0+
