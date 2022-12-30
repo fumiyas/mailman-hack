@@ -93,7 +93,7 @@ function fml_size_to_mm_size {
   typeset -i fml_size=0
   typeset -i mm_size=0
 
-  case "$fml_size" in
+  case "$fml_size_raw" in
   *[Mm])
     ((fml_size = ${fml_size_raw%?} * 1024 * 1024))
     ;;
