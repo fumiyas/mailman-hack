@@ -171,6 +171,8 @@ clean_tempfiles_pre() {
 #log="$tmp_dir/${0##*/}.$(date '+%Y%m%d.%H%M%S').log"
 #exec 2> >(tee "$log" 1>&2)
 
+fml_aliases=""
+
 mm_user="${MAILMAN_USER-mailman}"
 mm_dir="${MAILMAN_DIR-/opt/osstech/lib/mailman}"
 mm_var_dir="${MAILMAN_VAR_DIR-/opt/osstech/var/lib/mailman}"
@@ -215,6 +217,10 @@ while [[ $# -gt 0 ]]; do
   fi
 
   case "$opt" in
+  --fml-aliases)
+    getopts_want_arg "$opt" ${1+"$1"}
+    fml_aliases="$1"; shift
+    ;;
   --mm-user)
     getopts_want_arg "$opt" ${1+"$1"}
     mm_user="$1"; shift
@@ -250,18 +256,19 @@ done
 
 ## ----------------------------------------------------------------------
 
-if [[ $# -ne 2 ]]; then
-  echo "Usage: $0 FML_LIST_DIR FML_ALIASES"
+if [[ $# -ne 1 ]]; then
+  echo "Usage: $0 FML_LIST_DIR"
   exit 1
 fi
 
 fml_list_dir="$1"; shift
-fml_aliases="$1"; shift
 
-if [[ $fml_aliases != /* ]]; then
+fml_localname="${fml_list_dir##*/}"
+if [[ -z $fml_aliases ]]; then
+  fml_aliases="$fml_list_dir/aliases"
+elif [[ $fml_aliases != /* ]]; then
   fml_aliases="$PWD/$fml_aliases"
 fi
-fml_localname="${fml_list_dir##*/}"
 
 cd "$fml_list_dir" || exit $?
 if [[ ! -f config.ph ]]; then
