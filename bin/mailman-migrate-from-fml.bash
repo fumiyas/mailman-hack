@@ -180,6 +180,7 @@ mm_archives_dir="${MAILMAN_ARCHIVES_DIR-$mm_var_dir/archives}"
 typeset -l mm_list_name mm_list_domain
 mm_list_name=""
 mm_list_domain=""
+mm_owners=""
 mm_info="${MAILMAN_INFO-}"
 mm_description="${MAILMAN_DESCRIPTION-}"
 
@@ -238,6 +239,10 @@ while [[ $# -gt 0 ]]; do
   --mm-list-domain)
     getopts_want_arg "$opt" ${1+"$1"}
     mm_list_domain="$1"; shift
+    ;;
+  --mm-owners)
+    getopts_want_arg "$opt" ${1+"$1"}
+    mm_owners="$1"; shift
     ;;
   --)
     break
@@ -399,9 +404,14 @@ if [[ -d $mm_list_dir ]]; then
   pdie "Mailman list $mm_list_name already exists"
 fi
 
-mm_owner_email="${MAILMAN_OWNER_EMAIL-mailman@$mm_list_domain}"
-mm_postid=$(cat seq 2>/dev/null) && ((mm_postid++))
+if [[ -n $mm_owners ]]; then
+  mm_owners="${mm_owners// /,}"
+  mm_owner="${mm_owners%%,*}"
+else
+  mm_owner="${MAILMAN_OWNER-mailman@$mm_list_domain}"
+fi
 mm_owner_password=$(pwgen) || pdie "Failed to generate a password" $?
+mm_postid=$(cat seq 2>/dev/null) && ((mm_postid++))
 mm_max_message_size=$(fml_size_to_mm_size "${fml_cf[INCOMING_MAIL_SIZE_LIMIT]:-0}")
 mm_max_days_to_hold="${fml_cf[MODELATOR_EXPIRE_LIMIT]:-14}"
 ## &DEFINE_FIELD_FORCED('reply-to',$MAIL_LIST);
@@ -530,7 +540,7 @@ run "$mm_dir/bin/newlist" \
   --quiet \
   --emailhost="$mm_list_domain" \
   "$mm_list_name" \
-  "$mm_owner_email" \
+  "$mm_owner" \
   "$mm_owner_password" \
   || exit $?
 
@@ -587,48 +597,52 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
   fi
 
   echo "m.owner = ["
-  (
-    ## Migrate owner addresses from the FML aliases file
-    ## FIXME: Support ":include:/path/to/file"-style entries
-    ## (1) Remove comments
-    ## (2) Normalize separators
-    ## (3) Unwrap lines
-    ## (4) Append @DOMAINNAME if @ does not exist
-    ## (5) Enclose addresses by triple-quotations
+  if [[ -n $mm_owners ]]; then
+    echo "'''${mm_owners//,/"'''", "'''"}'''"
+  else
     (
-      ## Append a blank line after aliases (This is required for sed unwrap script)
-      cat "$fml_aliases" || perr "Failed to read FML aliases file: $fml_aliases"
-      echo
+      ## Migrate owner addresses from the FML aliases file
+      ## FIXME: Support ":include:/path/to/file"-style entries
+      ## (1) Remove comments
+      ## (2) Normalize separators
+      ## (3) Unwrap lines
+      ## (4) Append @DOMAINNAME if @ does not exist
+      ## (5) Enclose addresses by triple-quotations
+      (
+        ## Append a blank line after aliases (This is required for sed unwrap script)
+        cat "$fml_aliases" || perr "Failed to read FML aliases file: $fml_aliases"
+        echo
+      ) \
+      |sed \
+        -e 's/#.*//' \
+        -e 's/[ 	,]\{1,\}/ /g' \
+      |sed -n \
+        -e '1 {h; $ !d}' \
+        -e '$ {x; s/\n / /g; p}' \
+        -e '/^ / {H; d}' \
+        -e '/^ /! {x; s/\n / /g; p}' \
+      |grep -i "^$fml_localname-admin *:" \
+      |sed \
+        -e 's/^[^:]*: *//' \
+        -e 's/ /\n/g' \
+      ;
+      sed \
+        -e 's/#.*//' \
+        -e '/^$/d' \
+        members-admin \
+        include-admin \
+        2>/dev/null \
+      ;
     ) \
     |sed \
-      -e 's/#.*//' \
-      -e 's/[ 	,]\{1,\}/ /g' \
-    |sed -n \
-      -e '1 {h; $ !d}' \
-      -e '$ {x; s/\n / /g; p}' \
-      -e '/^ / {H; d}' \
-      -e '/^ /! {x; s/\n / /g; p}' \
-    |grep -i "^$fml_localname-admin *:" \
-    |sed \
-      -e 's/^[^:]*: *//' \
-      -e 's/ /\n/g' \
+      -e '/^:include:/d' \
+      -e "s/^fml\$/$mm_owner/" \
+      -e "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
+      -e 's/^/"""/' \
+      -e 's/$/""",/' \
+    |sort -uf \
     ;
-    sed \
-      -e 's/#.*//' \
-      -e '/^$/d' \
-      members-admin \
-      include-admin \
-      2>/dev/null \
-    ;
-  ) \
-  |sed \
-    -e '/^:include:/d' \
-    -e "s/^fml\$/$mm_owner_email/" \
-    -e "s/^\([^@]*\)\$/\1@${fml_cf[DOMAINNAME]}/" \
-    -e 's/^/"""/' \
-    -e 's/$/""",/' \
-  |sort -uf \
-  ;
+  fi
   echo ']'
 
   if [[ -s $fml_list_moderators ]]; then
