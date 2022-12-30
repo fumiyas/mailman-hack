@@ -567,6 +567,7 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
 
 (
   echo '# -*- coding: utf-8 -*-'
+  echo 'import re'
   echo 'from Mailman import Utils'
   echo 'def run(m):'
   exec > >(sed 's/^/    /')
@@ -580,6 +581,8 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
   ## thus we migrate $REJECT_ADDR to m.discard_these_nonmembers
   ## instead of m.reject_these_nonmembers.
   echo "m.discard_these_nonmembers = ['''^(${fml_cf[REJECT_ADDR]})@''']"
+  echo 'for e in m.discard_these_nonmembers:'
+  echo '    re.compile(e)'
   echo "m.forward_auto_discards = $mm_forward_auto_discards"
   echo "m.max_message_size = $mm_max_message_size"
   echo "m.max_days_to_hold = $mm_max_days_to_hold"
