@@ -567,6 +567,7 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
 
 (
   echo '# -*- coding: utf-8 -*-'
+  echo 'from Mailman import Utils'
   echo 'def run(m):'
   exec > >(sed 's/^/    /')
   echo "m.info = '''$mm_info'''"
@@ -644,6 +645,8 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
     ;
   fi
   echo ']'
+  echo 'for a in m.owner:'
+  echo '    Utils.ValidateEmail(a)'
 
   if [[ -s $fml_list_moderators ]]; then
     echo "m.moderator = ["
@@ -653,6 +656,8 @@ mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
       "$fml_list_moderators" \
     ;
     echo ']'
+    echo 'for a in m.moderator:'
+    echo '    Utils.ValidateEmail(a)'
   fi
 
   echo 'm.Save()'
