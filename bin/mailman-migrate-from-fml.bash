@@ -177,6 +177,9 @@ mm_var_dir="${MAILMAN_VAR_DIR-/opt/osstech/var/lib/mailman}"
 mm_lists_dir="${MAILMAN_LISTS_DIR-$mm_var_dir/lists}"
 mm_archives_dir="${MAILMAN_ARCHIVES_DIR-$mm_var_dir/archives}"
 
+typeset -l mm_list_name mm_list_domain
+mm_list_name=""
+mm_list_domain=""
 mm_info="${MAILMAN_INFO-}"
 mm_description="${MAILMAN_DESCRIPTION-}"
 
@@ -224,6 +227,14 @@ while [[ $# -gt 0 ]]; do
     getopts_want_arg "$opt" ${1+"$1"}
     mm_var_dir="$1"; shift
     ;;
+  --mm-list-name)
+    getopts_want_arg "$opt" ${1+"$1"}
+    mm_list_name="$1"; shift
+    ;;
+  --mm-list-domain)
+    getopts_want_arg "$opt" ${1+"$1"}
+    mm_list_domain="$1"; shift
+    ;;
   --)
     break
     ;;
@@ -239,16 +250,13 @@ done
 
 ## ----------------------------------------------------------------------
 
-if [[ $# -lt 2 || $# -gt 4 ]]; then
-  echo "Usage: $0 FML_LIST_DIR FML_ALIASES [MM_LIST_NAME [MM_LIST_DOMAIN]]"
+if [[ $# -ne 2 ]]; then
+  echo "Usage: $0 FML_LIST_DIR FML_ALIASES"
   exit 1
 fi
 
 fml_list_dir="$1"; shift
 fml_aliases="$1"; shift
-typeset -l mm_list_name mm_list_domain
-mm_list_name="${1-}"; ${1+shift}
-mm_list_domain="${1-}"; ${1+shift}
 
 if [[ $fml_aliases != /* ]]; then
   fml_aliases="$PWD/$fml_aliases"
