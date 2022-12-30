@@ -103,7 +103,7 @@ function fml_size_to_mm_size {
     ((fml_size = ${fml_size_raw%?} * 1024))
     ;;
   [!0-9])
-    pdie "pwgen: Invalid \$INCOMING_MAIL_SIZE_LIMIT value in config.ph: $fml_size_raw"
+    pdie "${FUNCNAME[0]}: Invalid \$INCOMING_MAIL_SIZE_LIMIT value in config.ph: $fml_size_raw"
     ;;
   *)
     fml_size="$fml_size_raw"
