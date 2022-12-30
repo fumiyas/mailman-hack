@@ -360,9 +360,12 @@ members_only)
     mm_generic_nonmember_action=3 ## Discard for non members
     ;;
   auto_subscribe)
-    pwarn "$mm_list_name: REJECT_POST_HANDLER='${fml_cf[REJECT_POST_HANDLER]}' not supported: Redirect to moderator instead"
-    mm_member_moderation_action=0 ## Hold for moderated members
-    mm_generic_nonmember_action=1 ## Hold for non members
+    pwarn "$mm_list_name: REJECT_POST_HANDLER='${fml_cf[REJECT_POST_HANDLER]}' not supported: Reject instead"
+    mm_member_moderation_action=1 ## Reject for moderated members
+    mm_generic_nonmember_action=2 ## Reject for non members
+    #pwarn "$mm_list_name: REJECT_POST_HANDLER='${fml_cf[REJECT_POST_HANDLER]}' not supported: Redirect to moderator instead"
+    #mm_member_moderation_action=0 ## Hold for moderated members
+    #mm_generic_nonmember_action=1 ## Hold for non members
     ;;
   *)
     perr "$mm_list_name: REJECT_POST_HANDLER='${fml_cf[REJECT_POST_HANDLER]}' not supported"
