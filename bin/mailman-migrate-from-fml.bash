@@ -556,6 +556,7 @@ pinfo "Migrating list configuration to Mailman"
 mm_withlist_config_py="$mm_fml_dir/mm_withlist_config.py"
 
 (
+  echo '# -*- coding: utf-8 -*-'
   echo 'def run(m):'
   exec > >(sed 's/^/    /')
   echo "m.info = '''$mm_info'''"
@@ -677,6 +678,7 @@ if [[ -s $mm_members_regular || -s $mm_members_digest ]]; then
   pinfo "Set Mailman member options"
   mm_withlist_member_options_py="$mm_fml_dir/mm_withlist_member_options.py"
   (
+    echo '# -*- coding: utf-8 -*-'
     echo 'from Mailman import mm_cfg'
     echo 'from Mailman import MemberAdaptor'
     echo 'def run(m):'
