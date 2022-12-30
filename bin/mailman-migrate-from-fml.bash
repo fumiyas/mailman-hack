@@ -22,18 +22,16 @@ umask 0027
 unset PYTHONPATH
 export PYTHONDONTWRITEBYTECODE='set'
 
-cmd_arg0="$0"
-
 function pinfo {
   echo "INFO: $1" 1>&2
 }
 
 function pwarn {
-  echo "$cmd_arg0: WARNING: $1" 1>&2
+  echo "$0: WARNING: $1" 1>&2
 }
 
 function perr {
-  echo "$cmd_arg0: ERROR: $1" 1>&2
+  echo "$0: ERROR: $1" 1>&2
 }
 
 function pdie {
