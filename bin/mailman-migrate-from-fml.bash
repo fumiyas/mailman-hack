@@ -166,6 +166,8 @@ clean_tempfiles_pre() {
   mv "$tmp_dir"/* "$mm_fml_dir/" >/dev/null 2>&1
 }
 
+## ======================================================================
+
 #log="$tmp_dir/${0##*/}.$(date '+%Y%m%d.%H%M%S').log"
 #exec 2> >(tee "$log" 1>&2)
 
@@ -177,6 +179,65 @@ mm_archives_dir="${MAILMAN_ARCHIVES_DIR-$mm_var_dir/archives}"
 
 mm_info="${MAILMAN_INFO-}"
 mm_description="${MAILMAN_DESCRIPTION-}"
+
+getopts_want_arg()
+{
+  if [[ $# -lt 2 ]]; then
+    pdie "Option requires an argument: $1"
+  fi
+  if [[ -n ${3:+set} ]]; then
+    if [[ $2 =~ $3 ]]; then
+      : OK
+    else
+      pdie "Invalid value for option: $1: $2"
+    fi
+  fi
+  if [[ -n ${4:+set} ]]; then
+    if [[ $2 =~ $4 ]]; then
+      pdie "Invalid value for option: $1: $2"
+    fi
+  fi
+}
+
+while [[ $# -gt 0 ]]; do
+  opt="$1"; shift
+
+  if [[ -z "${opt##-[!-]?*}" ]]; then
+    set -- "-${opt#??}" ${1+"$@"}
+    opt="${opt%"${1#-}"}"
+  fi
+  if [[ -z "${opt##--*=*}" ]]; then
+    set -- "${opt#--*=}" ${1+"$@"}
+    opt="${opt%%=*}"
+  fi
+
+  case "$opt" in
+  --mm-user)
+    getopts_want_arg "$opt" ${1+"$1"}
+    mm_user="$1"; shift
+    ;;
+  --mm-dir)
+    getopts_want_arg "$opt" ${1+"$1"}
+    mm_dir="$1"; shift
+    ;;
+  --mm-var-dir)
+    getopts_want_arg "$opt" ${1+"$1"}
+    mm_var_dir="$1"; shift
+    ;;
+  --)
+    break
+    ;;
+  -*)
+    pdie "Invalid option: $opt"
+    ;;
+  *)
+    set -- "$opt" ${1+"$@"}
+    break
+    ;;
+  esac
+done
+
+## ----------------------------------------------------------------------
 
 if [[ $# -lt 2 || $# -gt 4 ]]; then
   echo "Usage: $0 FML_LIST_DIR FML_ALIASES [MM_LIST_NAME [MM_LIST_DOMAIN]]"
