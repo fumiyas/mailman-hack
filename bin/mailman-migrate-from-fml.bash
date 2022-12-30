@@ -11,6 +11,9 @@
 ##	  * &ADD_CONTENT_HANDLER() (FIXME)
 ##	  * and more...
 
+# shellcheck disable=SC2317
+# Command appears to be unreachable. Check usage (or ignore if invoked indirectly). [SC2317]
+
 set -u
 set -o pipefail || exit $?		## bash 3.0+
 shopt -s lastpipe || exit $?		## bash 4.2+
