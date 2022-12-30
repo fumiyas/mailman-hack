@@ -694,8 +694,10 @@ if [[ -s $mm_members_regular || -s $mm_members_digest ]]; then
     --welcome-msg=n \
     --admin-notify=n \
     "$mm_list_name" \
-  |sed "s/^/INFO: add_members: /" \
-    || exit $? \
+  |sed -E \
+    -e '/^(Subscribed|入会しました): /d' \
+    -e "s|^|$0: ERROR: add_members: |" \
+  || exit $? \
   ;
 
   pinfo "Set Mailman member options"
