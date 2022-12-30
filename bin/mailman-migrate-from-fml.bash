@@ -691,6 +691,7 @@ if [[ -s $mm_members_regular || -s $mm_members_digest ]]; then
     --welcome-msg=n \
     --admin-notify=n \
     "$mm_list_name" \
+  |sed "s/^/INFO: add_members: /" \
     || exit $? \
   ;
 
