@@ -411,10 +411,6 @@ mm_forward_auto_discards='True'
 mm_bounce_processing='False'
 mm_default_member_moderation='False'
 
-if [[ ${fml_cf[AUTO_REGISTRATION_TYPE]} != 'confirmation' ]]; then
-  pdie "$mm_list_name: AUTO_REGISTRATION_TYPE='${fml_cf[AUTO_REGISTRATION_TYPE]}' not supported"
-fi
-
 case "${fml_cf[PERMIT_POST_FROM]}" in
 anyone)
   mm_member_moderation_action=0 ## Hold for moderated members
