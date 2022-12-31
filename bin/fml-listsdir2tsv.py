@@ -140,9 +140,10 @@ for alias in sorted(entries_by_alias.keys()):
 
     if fml_dir:
         alias_admins_ht = htpasswd2addresses(alias, fml_dir, email_domain_default)
-        if alias_admins_ht != alias_admins:
-            logger.warning('List admins differ: %s: alias   : %s', alias, alias_admins)
-            logger.warning('List admins differ: %s: htpasswd: %s', alias, alias_admins_ht)
+        #if alias_admins_ht != alias_admins:
+        #    logger.warning('List admins differ: %s: alias   : %s', alias, alias_admins)
+        #    logger.warning('List admins differ: %s: htpasswd: %s', alias, alias_admins_ht)
+        alias_admins.update(alias_admins_ht)
 
     admins_by_name[alias] = alias_admins
 
