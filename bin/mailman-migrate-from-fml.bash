@@ -468,6 +468,7 @@ mm_subscribe_policy=3 ## Confirm and approve
 if [[ ${fml_cf[PERMIT_COMMAND_FROM]} = 'anyone' ||
       ${fml_cf[REJECT_COMMAND_HANDLER]} = @(auto_subscribe|auto_regist) ]]; then
   mm_subscribe_policy=1 ## Confirm
+  #mm_unsubscribe_policy=0 ## Confirm ???? FIXME
 fi
 
 mm_subject_prefix=''
@@ -554,6 +555,7 @@ mm_fml_dir="$mm_list_dir/fml"
 
 run mkdir -m 0750 "$mm_fml_dir" || exit $?
 run export PYTHONPATH="$mm_fml_dir" || exit $?
+## FIXME: Support spamlist
 for fname in config.ph seq members{,-admin} actives moderators include-admin; do
   if [[ -f "$fname" ]]; then
     run cp -pn "$fname" "$mm_fml_dir/" || exit $?
