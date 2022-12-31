@@ -9,6 +9,15 @@
 set -u
 set -o pipefail || exit $?		## bash 3.0+
 
+perr() {
+  echo "$0: ERROR: $1" 1>&2
+}
+
+pdie() {
+  perr "$1"
+  exit "${2-1}"
+}
+
 ## ======================================================================
 
 getopts_want_arg()
