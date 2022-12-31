@@ -19,13 +19,16 @@ re_entry_sp = re.compile(r'\s,\s')
 re_list_entry = re.compile(r'^:include:(?P<list_dir>/.*/(?P<list_basedir>[^/]+))/include$')
 re_include_entry = re.compile(r'^:include:(?P<list_dir>/.*/(?P<list_basedir>[^/]+))/(?P<include_basename>[^/]+)$')
 
+if (len(sys.argv) < 3):
+    print(f'Usage: {sys.argv[0]} LISTS_DIR DEFAULT_EMAIL_DOMAIN [FML_DIR]')
+    sys.exit(1)
 lists_dir = sys.argv[1]
-email_default_domain = sys.argv[2]
+email_domain_default = sys.argv[2]
 fml_dir = sys.argv[3] if len(sys.argv) >= 4 else None
 aliases_file = lists_dir + '/etc/aliases'
 
 
-def htpasswd2addresses(list_name, fml_dir, email_default_domain):
+def htpasswd2addresses(list_name, fml_dir, email_domain_default):
     htpasswd_file = f'{fml_dir}/www/authdb/ml-admin/{list_name}/htpasswd'
     addrs = []
     try:
@@ -36,7 +39,7 @@ def htpasswd2addresses(list_name, fml_dir, email_default_domain):
                     continue
                 addr = line[:line.find(':')]
                 if '@' not in addr:
-                    addr += '@' + email_default_domain
+                    addr += '@' + email_domain_default
                 addrs.append(addr)
     except Exception as e:
         logger.warning("Failed to open file: %s: %s", htpasswd_file, e)
@@ -44,11 +47,11 @@ def htpasswd2addresses(list_name, fml_dir, email_default_domain):
     return addrs
 
 
-def entry2addresses(entry, lists_dir, email_default_domain, list_orig_dir):
+def entry2addresses(entry, lists_dir, email_domain_default, list_orig_dir):
     include_entry_m = re_include_entry.match(entry)
     if not include_entry_m:
         if '@' not in entry:
-            entry += '@' + email_default_domain
+            entry += '@' + email_domain_default
         return [entry]
 
     if include_entry_m['list_dir'] != list_orig_dir:
@@ -63,7 +66,7 @@ def entry2addresses(entry, lists_dir, email_default_domain, list_orig_dir):
                 line = line.strip()
                 if line == '' or line.startswith('#'):
                     continue
-                addrs.extend(entry2addresses(line, lists_dir, email_default_domain, list_orig_dir))
+                addrs.extend(entry2addresses(line, lists_dir, email_domain_default, list_orig_dir))
     except Exception as e:
         logger.warning("Failed to open file: %s: %s", include_file, e)
 
@@ -133,11 +136,11 @@ for alias in sorted(entries_by_alias.keys()):
     list_orig_dir = list_entry_m['list_dir']
     alias_admins = []
     for entry in entries_by_alias.pop(alias_admin):
-        alias_admins += entry2addresses(entry, lists_dir, email_default_domain, list_orig_dir)
+        alias_admins += entry2addresses(entry, lists_dir, email_domain_default, list_orig_dir)
     alias_admins.sort()
 
     if fml_dir:
-        alias_admins_ht = htpasswd2addresses(alias, fml_dir, email_default_domain)
+        alias_admins_ht = htpasswd2addresses(alias, fml_dir, email_domain_default)
         alias_admins_ht.sort()
         if set(alias_admins_ht) != set(alias_admins):
             logger.warning('List admins differ: %s: alias   : %s', alias, alias_admins)
