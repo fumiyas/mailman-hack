@@ -11,9 +11,6 @@
 ##	  * &ADD_CONTENT_HANDLER() (FIXME)
 ##	  * and more...
 
-# shellcheck disable=SC2317
-# Command appears to be unreachable. Check usage (or ignore if invoked indirectly). [SC2317]
-
 set -u
 set -o pipefail || exit $?		## bash 3.0+
 shopt -s lastpipe || exit $?		## bash 4.2+
@@ -64,6 +61,7 @@ function pwgen {
   echo "$pw"
 }
 
+# shellcheck disable=SC2317
 function fml_true_p {
   [[ ${1-} = @(|0) ]] && return 1
   return 0
@@ -116,6 +114,7 @@ function fml_size_to_mm_size {
 
 _cmds_at_exit=()
 
+# shellcheck disable=SC2317
 cmds_at_exit() {
   typeset cmd
 
@@ -148,6 +147,7 @@ create_tempfile() {
   eval "$vname=\"\$fname\""
 }
 
+# shellcheck disable=SC2317
 clean_tempfiles() {
   if type clean_tempfiles_pre >/dev/null 2>&1; then
     clean_tempfiles_pre
@@ -158,6 +158,7 @@ clean_tempfiles() {
 tmp_dir=
 create_tempfile tmp_dir -d || pdie "Failed to create temporary directory: $?"
 
+# shellcheck disable=SC2317
 clean_tempfiles_pre() {
   [[ -n ${mm_fml_dir-} ]] || return
   [[ -d $mm_fml_dir ]] || return
