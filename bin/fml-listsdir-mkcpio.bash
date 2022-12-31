@@ -104,8 +104,7 @@ cpio_gz="$1"; shift
     -mindepth 1 \
     -maxdepth 1 \
     -type d \
-    ! -name '@*' \
-    ! -name '-*' \
+    ! -name '[-.@]*' \
     -print0 \
   |xargs -0 sh -"${-//[!x]}c" '
     find \
