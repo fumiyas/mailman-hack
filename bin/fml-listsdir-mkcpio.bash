@@ -18,8 +18,51 @@ pdie() {
   exit "${2-1}"
 }
 
+## ----------------------------------------------------------------------
+
+_cmds_at_exit=()
+
+# shellcheck disable=SC2317
+cmds_at_exit() {
+  local cmd
+
+  for cmd in "${_cmds_at_exit[@]}"; do
+    "$cmd"
+  done
+}
+
+trap 'cmds_at_exit' EXIT
+for signal in HUP INT TERM; do
+  trap 'cmds_at_exit; trap - EXIT '$signal'; kill -'$signal' -$$' $signal
+done
+
+## ----------------------------------------------------------------------
+
+_temp_files=()
+_cmds_at_exit+=(clean_tempfiles)
+
+create_tempfile() {
+  local vname="$1"; shift
+  local fname
+
+  if [[ $vname == *[!_0-9A-Za-z]* ]]; then
+    perr "${FUNCNAME[0]}: Invalid variable name: $vname"
+    return 1
+  fi
+
+  fname=$(mktemp "$@" "${TMPDIR:-/tmp}/${0##*/}.XXXXXXXX") || return $?
+  _temp_files+=("$fname")
+  eval "$vname=\"\$fname\""
+}
+
+# shellcheck disable=SC2317
+clean_tempfiles() {
+  [[ -n "${_temp_files[0]+set}" ]] && rm -rf "${_temp_files[@]}"
+}
+
 ## ======================================================================
 
+# shellcheck disable=SC2317
 getopts_want_arg()
 {
   if [[ $# -lt 2 ]]; then
@@ -76,10 +119,10 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ $# != 2 ]]; then
+if [[ $# != 3 ]]; then
   prog_name="${0##*/}"
   cat <<-EOF
-Usage: $prog_name [OPTIONS] FML_LISTS_DIR OUPUTO_CPIO_GZ
+Usage: $prog_name [OPTIONS] FML_DIR FML_LISTS_DIR OUTPUT_CPIO_GZ
 
 Options:
 -S, --without-spool
@@ -87,54 +130,80 @@ Options:
 --with-htdocs
     Include htdocs directory
 
-Example: $prog_name /var/spool/ml fml-lists.cpio.gz
+Example: $prog_name /usr/local/fml /var/spool/ml fml-lists.cpio.gz
 EOF
   exit 1
 fi
 
-## ======================================================================
-
+fml_dir="$1"; shift
 fml_lists_dir="$1"; shift
 cpio_gz="$1"; shift
 
+## ======================================================================
+
+if [[ $fml_dir != /* ]]; then
+  fml_dir="$PWD/$fml_dir"
+fi
+if [[ $fml_lists_dir != /* ]]; then
+  fml_lists_dir="$PWD/$fml_lists_dir"
+fi
+
+create_tempfile tmp_dir -d || exit $?
+
+# shellcheck disable=SC2154 # tmp_dir is referenced but not assigned
+ln -s "$fml_dir" "$tmp_dir/" || exit $?
+ln -s "$fml_lists_dir" "$tmp_dir/" || exit $?
+
 (
-  cd "$(dirname "$fml_lists_dir")" || exit $?
-  # shellcheck disable=SC2016 # Expressions don't expand in single quotes, use double quotes for that
-  find "$(basename "$fml_lists_dir")/" \
-    -mindepth 1 \
-    -maxdepth 1 \
-    -type d \
-    ! -name '[-.@]*' \
-    -print0 \
-  |xargs -0 sh -"${-//[!x]}c" '
-    find \
-      "$@" \
-      -mindepth 1 \
-      -maxdepth 3 \
-      -type d \( \
-        -name var -o \
-        ${without_htdocs_p:+-name htdocs -o} \
-        ${without_spool_p:+-name spool -o} \
-        -false \
-      \) \
+  cd "$tmp_dir" || exit $?
+  (
+    find "$(basename "$fml_dir")/" \
+      -type d \
+      -name '[-.@]*' \
       -prune \
       -o \
-      ! -name ".crc" \
-      ! -name log \
-      ! -name summary \
-      ! -name "actives.[0-9]" \
-      ! -name "actives.[0-9][0-9]" \
-      ! -name "members.[0-9]" \
-      ! -name "members.[0-9][0-9]" \
-      ! -name "fmlwrapper.[ch]" \
-      ! -name "*.bak" \
-      ! -name "*.db" \
-      ! -name "*.dir" \
-      ! -name "*.pag" \
-      ! -name "*.old" \
       -type f \
+      -name htpasswd \
+       -print0 \
+    ;
+    # shellcheck disable=SC2016 # Expressions don't expand in single quotes
+    find "$(basename "$fml_lists_dir")/" \
+      -mindepth 1 \
+      -maxdepth 1 \
+      -type d \
+      ! -name '[-.@]*' \
       -print0 \
-    ' sh \
+    |xargs -0 sh -"${-//[!x]}c" '
+      find \
+        "$@" \
+        -mindepth 1 \
+        -maxdepth 3 \
+        -type d \( \
+          -name var -o \
+          ${without_htdocs_p:+-name htdocs -o} \
+          ${without_spool_p:+-name spool -o} \
+          -false \
+        \) \
+        -prune \
+        -o \
+        ! -name ".crc" \
+        ! -name log \
+        ! -name summary \
+        ! -name "actives.[0-9]" \
+        ! -name "actives.[0-9][0-9]" \
+        ! -name "members.[0-9]" \
+        ! -name "members.[0-9][0-9]" \
+        ! -name "fmlwrapper.[ch]" \
+        ! -name "*.bak" \
+        ! -name "*.db" \
+        ! -name "*.dir" \
+        ! -name "*.pag" \
+        ! -name "*.old" \
+        -type f \
+        -print0 \
+      ' sh \
+    ;
+  ) \
   |cpio  \
     --quiet \
     --create \
