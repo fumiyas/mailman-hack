@@ -63,7 +63,7 @@ function pwgen {
 
 # shellcheck disable=SC2317
 function fml_true_p {
-  [[ ${1-} = @(|0) ]] && return 1
+  [[ $1 == @(|0) ]] && return 1
   return 0
 }
 
