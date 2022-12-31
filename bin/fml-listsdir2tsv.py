@@ -30,7 +30,7 @@ aliases_file = lists_dir + '/etc/aliases'
 
 def htpasswd2addresses(list_name, fml_dir, email_domain_default):
     htpasswd_file = f'{fml_dir}/www/authdb/ml-admin/{list_name}/htpasswd'
-    addrs = []
+    addrs = set()
     try:
         with open(htpasswd_file) as f:
             for line in f:
@@ -40,7 +40,7 @@ def htpasswd2addresses(list_name, fml_dir, email_domain_default):
                 addr = line[:line.find(':')]
                 if '@' not in addr:
                     addr += '@' + email_domain_default
-                addrs.append(addr)
+                addrs.add(addr)
     except Exception as e:
         logger.warning("Failed to open file: %s: %s", htpasswd_file, e)
 
@@ -52,21 +52,21 @@ def entry2addresses(entry, lists_dir, email_domain_default, list_orig_dir):
     if not include_entry_m:
         if '@' not in entry:
             entry += '@' + email_domain_default
-        return [entry]
+        return set([entry])
 
     if include_entry_m['list_dir'] != list_orig_dir:
         logger.warning("Include file for alias not in fml list directory: Expected %s, actual", list_orig_dir, include_entry_m['list_dir'])
-        return []
+        return set()
 
     include_file = '/'.join([lists_dir, include_entry_m['list_basedir'], include_entry_m['include_basename']])
-    addrs = []
+    addrs = set()
     try:
         with open(include_file) as f:
             for line in f:
                 line = line.strip()
                 if line == '' or line.startswith('#'):
                     continue
-                addrs.extend(entry2addresses(line, lists_dir, email_domain_default, list_orig_dir))
+                addrs.update(entry2addresses(line, lists_dir, email_domain_default, list_orig_dir))
     except Exception as e:
         logger.warning("Failed to open file: %s: %s", include_file, e)
 
@@ -134,15 +134,13 @@ for alias in sorted(entries_by_alias.keys()):
             logger.warning('Alias entry not found for list: %s: %s', alias, alias_x)
 
     list_orig_dir = list_entry_m['list_dir']
-    alias_admins = []
+    alias_admins = set()
     for entry in entries_by_alias.pop(alias_admin):
-        alias_admins += entry2addresses(entry, lists_dir, email_domain_default, list_orig_dir)
-    alias_admins.sort()
+        alias_admins.update(entry2addresses(entry, lists_dir, email_domain_default, list_orig_dir))
 
     if fml_dir:
         alias_admins_ht = htpasswd2addresses(alias, fml_dir, email_domain_default)
-        alias_admins_ht.sort()
-        if set(alias_admins_ht) != set(alias_admins):
+        if alias_admins_ht != alias_admins:
             logger.warning('List admins differ: %s: alias   : %s', alias, alias_admins)
             logger.warning('List admins differ: %s: htpasswd: %s', alias, alias_admins_ht)
 
