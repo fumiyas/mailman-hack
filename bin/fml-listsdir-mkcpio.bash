@@ -98,9 +98,9 @@ fml_lists_dir="$1"; shift
 cpio_gz="$1"; shift
 
 (
-  cd "$fml_lists_dir" || exit $?
+  cd "$(dirname "$fml_lists_dir")" || exit $?
   # shellcheck disable=SC2016 # Expressions don't expand in single quotes, use double quotes for that
-  find . \
+  find "$(basename "$fml_lists_dir")/" \
     -mindepth 1 \
     -maxdepth 1 \
     -type d \
