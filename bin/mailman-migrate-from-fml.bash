@@ -423,7 +423,7 @@ mm_default_member_moderation='False'
 
 case "${fml_cf[PERMIT_POST_FROM]}" in
 anyone)
-  mm_member_moderation_action=0 ## Hold for moderated members
+  mm_member_moderation_action=1 ## Reject for moderated members
   mm_generic_nonmember_action=0 ## Accept for non members
   ;;
 members_only)
