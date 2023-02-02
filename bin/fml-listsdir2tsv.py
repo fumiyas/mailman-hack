@@ -110,10 +110,20 @@ for alias in sorted(entries_by_alias.keys()):
     if not list_entry_m:
         ## メーリングリストのエイリアスエントリではないので無視
         continue
-    if alias != list_entry_m['list_basedir']:
-        logger.warning('List name does not match with list directory name: %s: %s', alias, list_entry_m['list_basedir'])
+
+    list_name = alias
+    list_dir = f'{lists_dir}/{list_name}'
+    list_aliases = [
+        list_name,
+        f'{list_name}-ctl',
+        f'{list_name}-request',
+        f'owner-{list_name}',
+        f'owner-{list_name}-ctl'
+    ]
+
+    if list_name != list_entry_m['list_basedir']:
+        logger.warning('List name does not match with list directory name: %s: %s', list_name, list_entry_m['list_basedir'])
         continue
-    list_dir = f'{lists_dir}/{alias}'
     if not os.path.isdir(list_dir):
         logger.warning('List directory not found: %s', list_dir)
         continue
@@ -122,30 +132,33 @@ for alias in sorted(entries_by_alias.keys()):
         logger.warning('List configuration file not found: %s', list_config_file)
         continue
 
-    alias_admin = alias + '-admin'
-    if alias_admin not in entries_by_alias:
-        logger.warning('Alias entry not found for list: %s: %s', alias, alias_admin)
+    list_admin_alias = list_name + '-admin'
+    try:
+        list_admin_entry = entries_by_alias.pop(list_admin_alias)
+    except KeyError:
+        logger.warning('Alias entry not found for list admin: %s: %s', list_name, list_admin_alias)
         continue
 
-    for alias_x in [alias, f'{alias}-ctl', f'{alias}-request', f'owner-{alias}', f'owner-{alias}-ctl']:
+    for list_alias in list_aliases:
         try:
-            entries_by_alias.pop(alias_x)
+            entries_by_alias.pop(list_alias)
         except KeyError:
-            logger.warning('Alias entry not found for list: %s: %s', alias, alias_x)
+            logger.warning('Alias entry not found for list: %s: %s', list_name, list_alias)
 
     list_orig_dir = list_entry_m['list_dir']
-    alias_admins = set()
-    for entry in entries_by_alias.pop(alias_admin):
-        alias_admins.update(entry2addresses(entry, lists_dir, email_domain_default, list_orig_dir))
+    list_admins = set()
+    for entry in list_admin_entry:
+        list_admins.update(entry2addresses(entry, lists_dir, email_domain_default, list_orig_dir))
 
     if fml_dir:
-        alias_admins_ht = htpasswd2addresses(alias, fml_dir, email_domain_default)
-        #if alias_admins_ht != alias_admins:
-        #    logger.warning('List admins differ: %s: alias   : %s', alias, alias_admins)
-        #    logger.warning('List admins differ: %s: htpasswd: %s', alias, alias_admins_ht)
-        alias_admins.update(alias_admins_ht)
+        ## FIXME: Use f'{list_dir}/etc/passwd' file instead if no fml_dir specified
+        list_admins_ht = htpasswd2addresses(list_name, fml_dir, email_domain_default)
+        #if list_admins_ht != list_admins:
+        #    logger.warning('List admins differ: %s: alias   : %s', list_name, list_admins)
+        #    logger.warning('List admins differ: %s: htpasswd: %s', list_name, list_admins_ht)
+        list_admins.update(list_admins_ht)
 
-    admins_by_name[alias] = alias_admins
+    admins_by_name[list_name] = list_admins
 
 for alias in sorted(entries_by_alias.keys()):
     logger.warning('Unrecognized alias entry: %s', alias)
