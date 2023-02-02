@@ -2,6 +2,7 @@
 ## -*- coding: utf-8 -*- vim:shiftwidth=4:expandtab:
 
 import logging
+import argparse
 import sys
 import os
 import re
@@ -19,13 +20,42 @@ re_entry_sp = re.compile(r'\s,\s')
 re_list_entry = re.compile(r'^:include:(?P<list_dir>/.*/(?P<list_basedir>[^/]+))/include$')
 re_include_entry = re.compile(r'^:include:(?P<list_dir>/.*/(?P<list_basedir>[^/]+))/(?P<include_basename>[^/]+)$')
 
-if (len(sys.argv) < 3):
-    print(f'Usage: {sys.argv[0]} LISTS_DIR DEFAULT_EMAIL_DOMAIN [FML_DIR]')
-    sys.exit(1)
-lists_dir = sys.argv[1]
-email_domain_default = sys.argv[2]
-fml_dir = sys.argv[3] if len(sys.argv) >= 4 else None
+args_parser = argparse.ArgumentParser(
+    prog=sys.argv[0],
+    add_help=True,
+)
+args_parser.add_argument(
+    '--fml-dir', metavar='DIR',
+    help='FML install directory',
+)
+args_parser.add_argument(
+    '--default-admin', metavar='EMAIL_ADDRESS',
+    help='Default admin (owner) e-mail address for lists without admin',
+)
+args_parser.add_argument(
+    '--default-email-domain', metavar='DOMAIN_NAME',
+    help='Append @DOMAIN_NAME to addresses without @ and domain part'
+)
+args_parser.add_argument(
+    '--exclude-list-names-from', metavar='FILE',
+    help='Read exclude list names from FILE',
+    type=argparse.FileType('r'),
+)
+args_parser.add_argument(
+    'lists_dir', metavar='DIR',
+    help='FML mailing-list directory',
+)
+args = args_parser.parse_args()
+
+lists_dir = args.lists_dir
+email_domain_default = args.default_email_domain
+fml_dir = args.fml_dir
 aliases_file = lists_dir + '/etc/aliases'
+
+exclude_list_names = set([
+    name.rstrip('\n') for name in args.exclude_list_names_from.readlines()
+])
+args.exclude_list_names_from.close()
 
 
 def htpasswd2addresses(list_name, fml_dir, email_domain_default):
@@ -144,6 +174,10 @@ for alias in sorted(entries_by_alias.keys()):
             entries_by_alias.pop(list_alias)
         except KeyError:
             logger.warning('Alias entry not found for list: %s: %s', list_name, list_alias)
+
+    if list_name in exclude_list_names:
+        logger.info('List name exluded: %s', list_name)
+        continue
 
     list_orig_dir = list_entry_m['list_dir']
     list_admins = set()
