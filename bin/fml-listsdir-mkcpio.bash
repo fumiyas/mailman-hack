@@ -141,12 +141,8 @@ cpio_gz="$1"; shift
 
 ## ======================================================================
 
-if [[ $fml_dir != /* ]]; then
-  fml_dir="$PWD/$fml_dir"
-fi
-if [[ $fml_lists_dir != /* ]]; then
-  fml_lists_dir="$PWD/$fml_lists_dir"
-fi
+fml_dir="$(realpath "$fml_dir")" || exit $?
+fml_lists_dir="$(realpath "$fml_lists_dir")" || exit $?
 
 create_tempfile tmp_dir -d || exit $?
 
