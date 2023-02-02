@@ -20,16 +20,23 @@ re_entry_sp = re.compile(r'\s,\s')
 re_list_entry = re.compile(r'^:include:(?P<list_dir>/.*/(?P<list_basedir>[^/]+))/include$')
 re_include_entry = re.compile(r'^:include:(?P<list_dir>/.*/(?P<list_basedir>[^/]+))/(?P<include_basename>[^/]+)$')
 
+## ======================================================================
+
 args_parser = argparse.ArgumentParser(
     prog=sys.argv[0],
     add_help=True,
+)
+
+args_parser.add_argument(
+    'lists_dir', metavar='DIR',
+    help='FML mailing-list directory',
 )
 args_parser.add_argument(
     '--fml-dir', metavar='DIR',
     help='FML install directory',
 )
 args_parser.add_argument(
-    '--default-admin', metavar='EMAIL_ADDRESS',
+    '--default-list-admin', metavar='EMAIL_ADDRESS',
     help='Default admin (owner) e-mail address for lists without admin',
 )
 args_parser.add_argument(
@@ -41,21 +48,24 @@ args_parser.add_argument(
     help='Read exclude list names from FILE',
     type=argparse.FileType('r'),
 )
-args_parser.add_argument(
-    'lists_dir', metavar='DIR',
-    help='FML mailing-list directory',
-)
+
 args = args_parser.parse_args()
+
+## ----------------------------------------------------------------------
 
 lists_dir = args.lists_dir
 email_domain_default = args.default_email_domain
+list_admin_default = args.default_list_admin
 fml_dir = args.fml_dir
-aliases_file = lists_dir + '/etc/aliases'
 
 exclude_list_names = set([
     name.rstrip('\n') for name in args.exclude_list_names_from.readlines()
 ])
 args.exclude_list_names_from.close()
+
+aliases_file = lists_dir + '/etc/aliases'
+
+## ======================================================================
 
 
 def htpasswd2addresses(list_name, fml_dir, email_domain_default):
@@ -176,7 +186,7 @@ for alias in sorted(entries_by_alias.keys()):
             logger.warning('Alias entry not found for list: %s: %s', list_name, list_alias)
 
     if list_name in exclude_list_names:
-        logger.info('List name exluded: %s', list_name)
+        logger.warning('List exluded by name: %s', list_name)
         continue
 
     list_orig_dir = list_entry_m['list_dir']
@@ -200,4 +210,7 @@ for alias in sorted(entries_by_alias.keys()):
 for list_name, admins in sorted(admins_by_name.items()):
     if not admins:
         logger.warning('List has no admin address: %s', list_name)
+        if list_admin_default:
+            admins = [list_admin_default]
+
     print(f'{list_name}\t{lists_dir}/{list_name}\t{" ".join(admins)}')
