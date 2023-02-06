@@ -58,10 +58,12 @@ email_domain_default = args.default_email_domain
 list_admin_default = args.default_list_admin
 fml_dir = args.fml_dir
 
-exclude_list_names = set([
-    name.rstrip('\n') for name in args.exclude_list_names_from.readlines()
-])
-args.exclude_list_names_from.close()
+exclude_list_names = None
+if args.exclude_list_names_from:
+    exclude_list_names = set([
+        name.rstrip('\n') for name in args.exclude_list_names_from.readlines()
+    ])
+    args.exclude_list_names_from.close()
 
 aliases_file = lists_dir + '/etc/aliases'
 
@@ -79,7 +81,10 @@ def htpasswd2addresses(list_name, fml_dir, email_domain_default):
                     continue
                 addr = line[:line.find(':')]
                 if '@' not in addr:
-                    addr += '@' + email_domain_default
+                    if email_domain_default:
+                        addr += '@' + email_domain_default
+                    else:
+                        logger.warning("Address without @ and domain part in htpasswd: %s", addr)
                 addrs.add(addr)
     except Exception as e:
         logger.warning("Failed to open file: %s: %s", htpasswd_file, e)
@@ -91,7 +96,10 @@ def entry2addresses(entry, lists_dir, email_domain_default, list_orig_dir):
     include_entry_m = re_include_entry.match(entry)
     if not include_entry_m:
         if '@' not in entry:
-            entry += '@' + email_domain_default
+            if email_domain_default:
+                entry += '@' + email_domain_default
+            else:
+                logger.warning("Address without @ and domain part in aliases: %s", entry)
         return set([entry])
 
     if include_entry_m['list_dir'] != list_orig_dir:
@@ -185,7 +193,7 @@ for alias in sorted(entries_by_alias.keys()):
         except KeyError:
             logger.warning('Alias entry not found for list: %s: %s', list_name, list_alias)
 
-    if list_name in exclude_list_names:
+    if exclude_list_names and list_name in exclude_list_names:
         logger.warning('List exluded by name: %s', list_name)
         continue
 
