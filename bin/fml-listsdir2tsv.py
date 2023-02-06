@@ -32,7 +32,13 @@ args_parser.add_argument(
     help='FML mailing-list directory',
 )
 args_parser.add_argument(
-    '--fml-dir', metavar='DIR',
+    'list_names', metavar='LIST_NAME',
+    nargs='*',
+    help='Target list name(s)'
+)
+
+args_parser.add_argument(
+    '--fml-dir', metavar='LISTS_DIR',
     help='FML install directory',
 )
 args_parser.add_argument(
@@ -54,6 +60,7 @@ args = args_parser.parse_args()
 ## ----------------------------------------------------------------------
 
 lists_dir = args.lists_dir
+list_names = args.list_names
 email_domain_default = args.default_email_domain
 list_admin_default = args.default_list_admin
 fml_dir = args.fml_dir
@@ -193,6 +200,8 @@ for alias in sorted(entries_by_alias.keys()):
         except KeyError:
             logger.warning('Alias entry not found for list: %s: %s', list_name, list_alias)
 
+    if list_names and list_name not in list_names:
+        continue
     if exclude_list_names and list_name in exclude_list_names:
         logger.warning('List exluded by name: %s', list_name)
         continue
