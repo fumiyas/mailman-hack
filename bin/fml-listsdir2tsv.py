@@ -39,7 +39,7 @@ args_parser.add_argument(
 
 args_parser.add_argument(
     '--fml-dir', metavar='LISTS_DIR',
-    help='FML install directory',
+    help='FML install directory to get admin (owner) e-mail addresses from htpasswd file',
 )
 args_parser.add_argument(
     '--default-list-admin', metavar='EMAIL_ADDRESS',
