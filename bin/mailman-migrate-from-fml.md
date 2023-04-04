@@ -93,6 +93,7 @@ FML メーリングリストディレクトリにはログや保存書庫が含�
 丸ごと移行先にコピーすると結構な容量を喰います。
 余計なファイルを概ね取り除いたアーカイブを作成するには
 `fml-listsdir-mkcpio.bash` を利用してみてください。
+(保存書庫の移行が不要であれば `--without-spool` オプションを追加)
 
 ```console
 # bash fml-listsdir-mkcpio.bash /var/spool/ml /srv/work/fml-lists.cpio.gz
