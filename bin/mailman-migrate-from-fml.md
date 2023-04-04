@@ -1,7 +1,7 @@
 FML 4 → Mailman 2.1 移行スクリプト
 ======================================================================
 
-* Copyright (C) 2013-2022 SATOH Fumiyasu @ OSSTech Corp., Japan
+* Copyright (C) 2013-2023 SATOH Fumiyasu @ OSSTech Corp., Japan
 * License: GNU General Public License version 3
 * URL: <https://github.com/fumiyas/mailman-hack>
 
@@ -10,6 +10,8 @@ FML 4 → Mailman 2.1 移行スクリプト
 
 FML 4 のメーリングリストを Mailman 2.1 のメーリングリストに雑に
 移行するスクリプトです。
+
+無保証です。[OSSTech 社の有償 Mailman 製品とコンサルティングサービス](https://www.osstech.co.jp/product/mailman/) の利用をご検討ください。
 
 使い方
 ----------------------------------------------------------------------
@@ -28,32 +30,26 @@ DEFAULT_MAX_DAYS_TO_HOLD = 14 ## days
 ### 実行
 
 ```console
-# mailman-migrate-from-fml.bash <リストディレクトリ> <aliases> [<URLホスト>]
+# mailman-migrate-from-fml.bash [オプション] <FML リストディレクトリ>
 ```
 
-* `<リストディレクトリ>`
+* `<FML リストディレクトリ>`
     * 移行元 FML のメーリングリストのディレクトリを指定します。
     * 例: `/var/spool/fml/<リスト名>`
-* `<aliases>`
-    * 移行元 FML のメーリングリストのメールエイリアス情報を含む
-      `aliases`(5) ファイルを指定します。
-    * `<リスト名>-admin` の転送先アドレスを移行先 Mailman
-      メーリングリストの管理者として登録するために参照します。
-    * FML ホストで稼働する MTA が参照している `aliases`
-      ファイルを指定する必要があります。
-      FML メーリングリストディレクトリ下の `aliases` ファイルは
-      MTA から参照されていません。
-    * 例: `/etc/aliases`
-* `[<URLホスト>]`
-    * 移行先 Mailman メーリングリストの Web UI の URL
-      に採用するホスト名を指定します。
-    * デフォルトは `mm_cfg.py` に依ります。
 
 ### 移行元データ
 
+* `/var/spool/ml/etc/aliases` (FML メールエイリアスファイル)
+    * FML ホストで稼働する MTA が参照しているメールエイリアスファイル。
+    * 必要ならば `--fml-aliases` オプションで指定する必要がある。
+      デフォルト値は `/var/spool/ml/<リスト名>/aliases`。
+    * 通常このファイルは `/var/spool/ml/*/aliases` を統合した内容になっているはずだが、
+      稀に手動で直接書き換える運用をしている例もある。
+    * `makefml recollect-aliases` で再作成可能。手動で直接書き換えている場合は変更が失なわれるので注意。
 * `/var/spool/ml/<リスト名>` (FML メーリングリストディレクトリ)
+    * `aliases` (メールエイリアス)
     * `config.ph` (設定)
-    * `seq` (連番)
+    * `seq` (投稿メール連番)
     * `members-admin` (管理者メールアドレスリスト)
     * `include-admin` (管理者メールアドレスリスト)
         * `:include:` を含む可能性があるが、それには非対応。
@@ -62,6 +58,8 @@ DEFAULT_MAX_DAYS_TO_HOLD = 14 ## days
     * `actives` (配信先メールアドレスリスト)
     * `spool/*` (保存書庫。任意)
 
+FML メーリングリストディレクトリにはログや保存書庫が含まれているため、
+丸ごと移行先にコピーすると結構な容量を喰います。
 余計なファイルを概ね取り除いたアーカイブを作成するには
 `fml-listsdir-mkcpio.bash` を利用してみてください。
 
@@ -75,17 +73,6 @@ cpio 形式アーカイブの展開例:
 $ mkdir fml-lists
 $ zcat /srv/work/fml-list-files.cpio.gz |cpio -idm
 ```
-
-### 環境変数 (デフォルト値)
-
-* `MAILMAN_USER` (mailman)
-    * Mailman の実行ユーザーを指定する。
-* `MAILMAN_SITE_EMAIL` (fml)
-    * fml の代表メールアドレス fml の移行先メールアドレスを指定する。
-* `MAILMAN_DIR` (`/opt/osstech/lib/mailman`)
-    * Mailman のインストールディレクトリを指定する。
-* `MAILMAN_VAR_DIR` (`/opt/osstech/var/lib/mailman`)
-    * Mailman のデータディレクトリを指定する。
 
 移行対象
 ----------------------------------------------------------------------
