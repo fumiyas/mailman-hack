@@ -20,12 +20,43 @@ FML 4 のメーリングリストを Mailman 2.1 のメーリングリストに�
 
 ### Mailman の設定
 
+Mailman の設定例 (一部) を示します。
+
 `mm_cfg.py`:
 
 ```python
+## Subscribe policy
+## 0: open list (only when ALLOW_OPEN_SUBSCRIBE is set to 1) **
+## 1: confirmation required for subscribes
+## 2: admin approval required for subscribes
+## 3: both confirmation and admin approval required
+DEFAULT_SUBSCRIBE_POLICY = 3
+
+## Unsubscribe policy
+## 0: unmoderated unsubscribes
+## 1: unsubscribes require admin approval
+DEFAULT_UNSUBSCRIBE_POLICY = 1
+
+## What shold happen to non-member posts which are do not match explicit
+## non-member actions?
+## 0: Accept
+## 1: Hold
+## 2: Reject
+## 3: Discard
+DEFAULT_GENERIC_NONMEMBER_ACTION = 2
+
+## Subject prefixing
 DEFAULT_SUBJECT_PREFIX = "[%(real_name)s:%%05d] "
-DEFAULT_MAX_DAYS_TO_HOLD = 14 ## days
+OLD_STYLE_PREFIXING = False
 ```
+
+上記の設定により Mailman で新規作成するメーリングリストのデフォルト値が以下のようになります。
+(この設定は任意です。移行ツールはこの設定の影響を受けません)
+
+* リスト会員への入会・退会はリスト管理者が実施。(自由に入会・退会できない)
+* 投稿は会員のみ許可。非会員からの投稿メールは拒否。
+* 会員への配信メールの表題 (`Subject:`) に `[<リスト名>:<投稿メール連番 0 埋め 5 桁>]` を追加。
+  (FML の標準)
 
 ### 実行
 
