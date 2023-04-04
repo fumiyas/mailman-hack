@@ -1,0 +1,6 @@
+.*.sw[po]
+.~*
+*~
+*.tmp
+tmp
+__pycache__
