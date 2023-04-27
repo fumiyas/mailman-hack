@@ -220,6 +220,8 @@ Mailman の FML との主な違い
           → 投稿不可能 (投稿者に拒否通知メールを返送)
         * 投稿破棄リスト (`discard_these_nonmembers`)
           → 投稿不可能 (なにも返送しない)
+        * 上記リストのいずれにも該当しない非会員からの投稿
+          → 許可・拒否・保留・破棄いずれかに設定可能 (`generic_nonmember_action`)
     * 会員からの投稿には非会員フィルタは適用されない点に注意。
         * FML の投稿を破棄する投稿者メールアドレスの正規表現パターン設定 (`$REJECT_ADDR`) は
           Mailman の非会員フィルター (`reject_these_nonmembers`) に移行するため、
