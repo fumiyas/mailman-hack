@@ -74,7 +74,7 @@ OLD_STYLE_PREFIXING = False
     * FML ホストで稼働する MTA が参照しているメールエイリアスファイル。
     * 必要ならば `--fml-aliases` オプションで指定する必要がある。
       デフォルト値は `/var/spool/ml/<リスト名>/aliases`。
-    * 通常このファイルは `/var/spool/ml/*/aliases` を統合した内容になっているはずだが、
+    * 通常このファイルはすべての `/var/spool/ml/<リスト名>/aliases` を統合した内容になっているはずだが、
       稀に手動で直接書き換える運用をしている例もある。
     * `makefml recollect-aliases` で再作成可能。手動で直接書き換えている場合は変更が失なわれるので注意。
 * `/var/spool/ml/<リスト名>` (FML メーリングリストディレクトリ)
