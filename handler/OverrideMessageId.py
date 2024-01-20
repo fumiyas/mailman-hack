@@ -22,7 +22,7 @@ import re
 
 from Mailman import mm_cfg
 
-RE_BRACKET = re.compile(r'^(<)?')
+RE_BRACKET = re.compile(r'^(\s*<)?')
 ORIG_NAME = 'X-Original-Message-ID'
 
 
