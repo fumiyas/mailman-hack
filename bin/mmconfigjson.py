@@ -88,13 +88,13 @@ def json_loads_byteified(json_text):
     )
 
 
-def _byteify(data, ignore_dicts = False):
+def _byteify(data, ignore_dicts=False):
     # if this is a unicode string, return its string representation
     if isinstance(data, unicode):
         return data.encode('utf-8')
     # if this is a list of values, return list of byteified values
     if isinstance(data, list):
-        return [ _byteify(item, ignore_dicts=True) for item in data ]
+        return [_byteify(item, ignore_dicts=True) for item in data]
     # if this is a dictionary, return dictionary of byteified keys and values
     # but only if we haven't already byteified it
     if isinstance(data, dict) and not ignore_dicts:
@@ -113,18 +113,18 @@ def configjson(listname, read_attr_names, write_attrs):
     try:
         try:
             mlist = MailList(listname, lock=write_p)
-        except Errors.MMListError, e:
+        except Errors.MMListError as e:
             pdie(2, C_('No such list "%(listname)s"\n%(e)s'))
 
         if not read_attr_names and not write_p:
             read_attr_names = filter(lambda n: attr_name_re.match(n), dir(mlist))
-            read_attr_names.remove('password') ## has admin's SHA-1 password hash
-            read_attr_names.remove('mod_password') ## ditto
-            read_attr_names.remove('post_password') ## ditto
-            read_attr_names.remove('passwords') ## has member's plain text password
+            read_attr_names.remove('password')  # has admin's SHA-1 password hash
+            read_attr_names.remove('mod_password')  # ditto
+            read_attr_names.remove('post_password')  # ditto
+            read_attr_names.remove('passwords')  # has member's plain text password
 
         if read_attr_names:
-            attrs = { "name": listname }
+            attrs = {"name": listname}
             for attr_name in read_attr_names:
                 if attr_name in ['bounce_info', 'delivery_status']:
                     ## Not JSON serializable
@@ -146,16 +146,16 @@ def configjson(listname, read_attr_names, write_attrs):
         if mlist and mlist.Locked():
             mlist.Unlock()
 
+
 def main():
     try:
         opts, args = getopt.getopt(
             sys.argv[1:], 'hs',
             ['help', 'set'])
-    except getopt.error, msg:
-        pdie(1, msg)
+    except getopt.error as e:
+        pdie(1, e)
 
     write_p = False
-    values = None
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             usage()
