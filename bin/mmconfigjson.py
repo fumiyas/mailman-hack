@@ -126,7 +126,8 @@ def configjson(listname, read_attr_names, write_attrs):
         if read_attr_names:
             attrs = { "name": listname }
             for attr_name in read_attr_names:
-                if attr_name in ['bounce_info']: ## is not JSON serializable
+                if attr_name in ['bounce_info', 'delivery_status']:
+                    ## Not JSON serializable
                     continue
                 try:
                     value = getattr(mlist, attr_name)
