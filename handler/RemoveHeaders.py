@@ -16,6 +16,11 @@ GLOBAL_PIPELINE[GLOBAL_PIPELINE.index('CookHeaders'):0] = [
 REMOVE_HEADERS = {
     'list-name-foo': ['Received'],
     'list-name-bar': ['Organization', 'User-Agent', 'X-Mailer'],
+    'list-name-qux': [
+        'DomainKey-Signature',
+        'DKIM-Signature',
+        'Authentication-Sesults',
+    ]
 }
 """
 
