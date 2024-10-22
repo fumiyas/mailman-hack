@@ -45,10 +45,11 @@ def process(mlist, msg, msgdata):
     if msgdata.get('isdigest') or msgdata.get('_fasttrack'):
         return
 
-    for name in ('From', 'To', 'Cc'):
+    for name in ('From', 'To', 'Cc', 'Reply-To'):
         value = msg.get(name)
         if not value:
             continue
 
         value = QUOTED_MIME_RE.sub('\\1', str(value))
-        change_header(name, value, mlist, msg, msgdata)
+        del msg[name]
+        msg[name] = value
