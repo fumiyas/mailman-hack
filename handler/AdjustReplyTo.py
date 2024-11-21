@@ -66,6 +66,7 @@ def process(mlist, msg, msgdata):
 
     ## Set 'Reply-To' header to the list's posting address and
     ## the address(es) taken from 'From', 'To', 'Cc' and 'Reply-To' headers.
+    listaddr = None
     listaddrs = [mlist.GetListEmail()]
     listaddrs += [alias.strip() for alias in mlist.acceptable_aliases.splitlines()]
     reply_to = OrderedDict()
@@ -77,9 +78,12 @@ def process(mlist, msg, msgdata):
                mlist.getDeliveryStatus(addr) == MemberAdaptor.ENABLED:
                 continue
             if domatch(listaddrs, addr):
+                listaddr = email.Utils.formataddr((name, addr))
                 continue
             reply_to[addr] = email.Utils.formataddr((name, addr))
-    if mlist.reply_to_address:
+    if listaddr:
+        reply_to[""] = listaddr
+    elif mlist.reply_to_address:
         reply_to[""] = mlist.reply_to_address
     else:
         i18ndesc = uheader(mlist, mlist.description, 'Reply-To')
