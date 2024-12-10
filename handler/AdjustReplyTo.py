@@ -78,7 +78,8 @@ def process(mlist, msg, msgdata):
                mlist.getDeliveryStatus(addr) == MemberAdaptor.ENABLED:
                 continue
             if domatch(listaddrs, addr):
-                listaddr = email.Utils.formataddr((name, addr))
+                if not listaddr:
+                    listaddr = email.Utils.formataddr((name, addr))
                 continue
             reply_to[addr] = email.Utils.formataddr((name, addr))
     if listaddr:
